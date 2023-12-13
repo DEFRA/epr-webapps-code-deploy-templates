@@ -1,0 +1,73 @@
+parameters:
+- name: imageTag
+  type: string
+  default: 'latest'
+- name: azureSubscription
+  type: string
+- name: acrName
+  type: string
+- name: registryName
+  type: string
+- name: appServiceName
+  type: string
+- name: targetEnvironment
+  type: string
+- name: resourceGroupName
+  type: string
+- name: appSettings
+  type: string
+- name: acrSubscription
+  type: string
+
+stages:
+  - stage: Validate
+    jobs:
+    - deployment: 'DeployAppCode'
+      environment: ${{ parameters.targetEnvironment }}
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - bash: |
+                  echo "Deploying dockerImage -->"${{ parameters.registryName }}:${{ parameters.imageTag }} " to env --> "${{ parameters.targetEnvironment }}
+                displayName: "Show Environment Details"
+
+              - ${{ if or(ne(parameters.targetEnvironment, 'development'), ne(parameters.targetEnvironment, 'LA_ENTITY_API_DEV1')) }}:
+              # - ${{ if or(eq(parameters.targetEnvironment, 'EPL_TST1'), eq(parameters.targetEnvironment, 'EPL_DEV1')) }}:
+                # Obtain Docker Password
+                - task: AzureKeyVault@2
+                  displayName: 'Obtain Docker Password'
+                  inputs:
+                    azureSubscription: 'AZD-EPL-DEV1'
+                    KeyVaultName: 'DEVEPLINFKV1401'
+                    SecretsFilter: 'DockerPassword'
+                    RunAsPreJob: true
+                # Copy the image from Dev ACR (release candidate) to Target ACR
+                - task: AzureCLI@2
+                  displayName: 'Copy Image to ${{ parameters.targetEnvironment }}'
+                  inputs:
+                    azureSubscription: ${{ parameters.acrSubscription }}
+                    scriptType: 'pscore'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az acr login --name ${{ parameters.acrName }}
+                      az acr import --name ${{ parameters.acrName }} --source deveplinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username deveplinfac1401 --password $(DockerPassword) --force
+
+              - task: AzureAppServiceSettings@1
+                displayName: 'Update App Config for --> ${{ parameters.appServiceName }}'
+                inputs:
+                  azureSubscription: $(azureSubscription)
+                  appName: $(appServiceName)
+                  resourceGroupName: $(resourceGroupName)
+                  appSettings: $(appSettings)
+
+              - task: AzureRmWebAppDeployment@4
+                displayName: 'Deploy code to --> ${{ parameters.appServiceName }}'
+                inputs:
+                  ConnectionType: 'AzureRM'
+                  azureSubscription: ${{ parameters.azureSubscription }}
+                  appType: 'webAppContainer'
+                  WebAppName: ${{ parameters.appServiceName }}
+                  DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
+                  DockerRepository: ${{ parameters.registryName }}
+                  DockerImageTag: ${{ parameters.imageTag }}

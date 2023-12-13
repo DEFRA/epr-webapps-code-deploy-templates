@@ -1,0 +1,43 @@
+parameters:
+- name: buildMigrationScript
+  type: boolean
+  default: false
+
+stages:
+  - stage: doingOWASPandDockerBuild
+    jobs:
+
+    - job: RunOWASPTests
+      displayName: Run OWASP Dependency checks
+      steps:
+        - template: templates/owaspcheck.yaml
+          parameters:
+            solutionFolder: $(solutionFolder)
+            testProjectFolder: $(testProjectFolder)
+
+    - job: BuildAndPushDockerImage
+      displayName: Build and Push Docker Image
+      dependsOn: RunOWASPTests
+      steps:
+        - template: templates/docker.yaml
+          parameters:
+            azureSubscription: $(azureSubscription)
+            solutionFolder: $(solutionFolder)
+            projectFolder: $(projectFolder)
+            azureContainerRegistryName: $(acr.azureContainerRegistryName)
+            repositoryName: $(acr.repositoryName)
+            branchName: ${{ replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_') }}
+
+    - job: BuildAndPushDockerImageSQLMigrationScript
+      displayName: Build and Push Docker Image - Migration Script
+      dependsOn: BuildAndPushDockerImage
+      condition: eq('${{parameters.buildMigrationScript}}', true)
+      steps:
+        - template: templates/docker-sql-migration-script.yaml
+          parameters:
+            azureSubscription: $(azureSubscription)
+            solutionFolder: $(solutionFolder)
+            projectFolder: $(projectFolder)
+            azureContainerRegistryName: $(acr.azureContainerRegistryName)
+            repositoryName: $(acr.repositoryName)
+            branchName: ${{ replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_') }}

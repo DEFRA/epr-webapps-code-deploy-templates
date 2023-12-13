@@ -1,0 +1,88 @@
+parameters:
+  - name: azureSubscription
+    type: string
+  - name: solutionFolder
+    type: string
+    default: ''
+  - name: projectFolder
+    type: string
+    default: ''
+  - name: azureContainerRegistryName
+    type: string
+  - name: imageName
+    type: string
+    default: rwdeprdevdockerimage
+  - name: repositoryName
+    type: string
+  - name: branchName
+    type: string
+
+steps:
+  - task: AzurePowerShell@5
+    displayName: 'Get SQL Credentials from KV'
+    inputs:
+      azureSubscription: $(azureSubscription)
+      ScriptType: 'InlineScript'
+      Inline: |
+        $sqladminu = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'RWDSql-AdminLogin' -AsPlainText
+        $sqladminp = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'RWDSql-AdminPassword' -AsPlainText
+
+        if ( "$(azureSubscription)" -like "*EPL*") {
+          $sqladminu = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'EPLSql-AdminLogin' -AsPlainText
+          $sqladminp = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'EPLSql-AdminPassword' -AsPlainText
+        }
+
+        echo "##vso[task.setvariable variable=sqladminu; isoutput=true]$sqladminu"
+        echo "##vso[task.setvariable variable=sqladminp; isoutput=true]$sqladminp"
+      azurePowerShellVersion: 'LatestVersion'
+
+  # Copy the image from Dev ACR (release candidate) to Target ACR
+  # - ${{ if ne(parameters.azureContainerRegistryName, devrwdinfac1401) }}:
+    # Obtain Docker Password
+  - task: AzureKeyVault@2
+    displayName: 'Obtain Docker Password'
+    inputs:
+      azureSubscription: 'AZD-RWD-DEV1'
+      KeyVaultName: 'DEVRWDINFKV1401'
+      SecretsFilter: 'DockerPassword'
+      RunAsPreJob: true
+  - task: AzureCLI@2
+    displayName: 'Additional Copy Image to ${{ parameters.azureContainerRegistryName }}'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        if [ ${{parameters.azureContainerRegistryName}} != 'devrwdinfac1401' ]
+        then
+          az acr login --name ${{ parameters.azureContainerRegistryName }}
+          az acr import --name ${{ parameters.azureContainerRegistryName }} --source devrwdinfac1401.azurecr.io/${{ parameters.repositoryName}}:${{parameters.branchName}}-database-migrations --image ${{ parameters.repositoryName }}:${{parameters.branchName}}-database-migrations --username devrwdinfac1401 --password $(DockerPassword) --force
+        fi
+
+  - task: AzureCLI@2
+    displayName: 'Pulling correct image'
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        docker images
+        az acr login --name ${{parameters.azureContainerRegistryName}}
+        docker pull ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.branchName}}-database-migrations
+
+  - task: AzureCLI@2
+    displayName: 'Docker run for migrations'
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        docker images
+
+        docker run --rm \
+          -e SERVER='$(sqlDBserver)' \
+          -e PORT='1433' \
+          -e USER='$(sqladminu)' \
+          -e PASSWORD='$(sqladminp)' \
+          -e DATABASE='$(sqlDB)' \
+          '${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.branchName}}-database-migrations'

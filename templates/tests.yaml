@@ -1,0 +1,74 @@
+parameters:
+  - name: solutionFolder
+    type: string
+    default: ''
+  - name: sonarQubeProjectKey
+    type: string
+  - name: sonarQubeProjectName
+    type: string
+  - name: runTests
+    type: boolean
+    default: true
+  - name: componentDirectory
+    type: string
+    default: ''
+  - name: projectName
+    type: string
+    default: ''
+  - name: testProjectFolder
+    type: string
+    default: ''
+
+steps:
+  - script: |
+      echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{parameters.solutionFolder}}/global.json
+
+  - task: SonarQubePrepare@5
+    displayName: 'SonarQube Prepare'
+    inputs:
+      SonarQube: 'SonarQube'
+      scannerMode: 'MSBuild'
+      projectKey: ${{parameters.sonarQubeProjectKey}}
+      projectName: ${{parameters.sonarQubeProjectName}}
+      extraProperties: sonar.cs.opencover.reportsPaths="$(Agent.TempDirectory)/coverage.opencover.xml"
+
+  - task: NuGetCommand@2
+    displayName: 'NuGet Restore'
+    inputs:
+      command: 'restore'
+      restoreSolution: '**/*.sln'
+      feedsToUse: 'config'
+      nugetConfigPath: '${{parameters.solutionFolder}}/NuGet.Config'
+
+  - task: UseDotNet@2
+    inputs:
+      version: '6.x'
+
+  - task: NuGetAuthenticate@1
+    displayName: 'Authenticate to NuGet'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Build'
+    condition: eq(${{parameters.runTests}}, true)
+    inputs:
+      command: build
+      # projects: '**/*[Uu]nit[Tt]ests/*.csproj'
+      projects: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
+      publishTestResults: true
+
+  - task: SonarQubeAnalyze@5
+    displayName: "SonarQube Analyze"
+
+  - task: SonarQubePublish@5
+    displayName: "SonarQube Publish"
+    inputs:
+      pollingTimeoutSec: '300'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Unit Tests'
+    condition: eq(${{parameters.runTests}}, true)
+    inputs:
+      command: test
+      # projects: '**/*[Uu]nit[Tt]ests/*.csproj'
+      projects: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
+      arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutput=$(Agent.TempDirectory)/ /p:CoverletOutputFormat=opencover'

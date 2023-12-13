@@ -1,0 +1,88 @@
+parameters:
+- name: solutionFolder
+  type: string
+  default: 'src'
+- name: projectFolder
+  type: string
+- name: testProjectFolder
+  type: string
+- name: sonarQubeProjectKey
+  type: string
+- name: sonarQubeProjectName
+  type: string
+- name: runTests
+  type: boolean
+  default: true
+- name: azureSubscription
+  type: string
+- name: acrAzureContainerRegistryName
+  type: string
+- name: acrRepositoryName
+  type: string
+- name: branchName
+  type: string
+- name: runNugetTasks
+  type: boolean
+  default: true
+- name: buildMigrationScript
+  type: boolean
+  default: false
+- name: componentDirectory
+  type: string
+  default: ''
+- name: runOWASPScan
+  type: boolean
+  default: false
+# temporarily defaulted to false due to 3rd party issue
+
+stages:
+  - stage: Validate
+    jobs:
+      - job: RunTests
+        displayName: Run Static Code Analysis and Tests
+        steps:
+          - template: templates/analyse-and-test.yaml
+            parameters:
+              solutionFolder: ${{ parameters.solutionFolder }}
+              sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
+              sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
+              runTests: ${{ parameters.runTests }}
+              runNugetTasks: ${{ parameters.runNugetTasks }}
+
+      - ${{ if eq(parameters.runOWASPScan, true) }}:
+        - job: RunOWASPTests
+          displayName: Run OWASP Dependency checks
+          dependsOn: RunTests
+          steps:
+            - template: templates/owaspcheck.yaml
+              parameters:
+                solutionFolder: ${{ parameters.solutionFolder }}
+                testProjectFolder: ${{ parameters.testProjectFolder }}
+                componentDirectory: ${{ parameters.componentDirectory }}
+
+      - job: BuildAndPushDockerImage
+        displayName: Build and Push Docker Image
+        dependsOn: RunTests
+        steps:
+          - template: templates/docker.yaml
+            parameters:
+              azureSubscription: ${{ parameters.azureSubscription }}
+              solutionFolder: ${{ parameters.solutionFolder }}
+              projectFolder: ${{ parameters.projectFolder }}
+              azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
+              repositoryName: ${{ parameters.acrRepositoryName }}
+              branchName: ${{ parameters.branchName }}
+
+      - job: BuildAndPushSQLMigrationDockerImage
+        displayName: Build and Push Docker Image - Migration Script
+        dependsOn: BuildAndPushDockerImage
+        condition: eq('${{parameters.buildMigrationScript}}', true)
+        steps:
+          - template: templates/docker-sql-migration-script.yaml
+            parameters:
+              azureSubscription: ${{ parameters.azureSubscription }}
+              solutionFolder: ${{ parameters.solutionFolder }}
+              projectFolder: ${{ parameters.projectFolder }}
+              azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
+              repositoryName: ${{ parameters.acrRepositoryName }}
+              branchName: ${{ parameters.branchName }}

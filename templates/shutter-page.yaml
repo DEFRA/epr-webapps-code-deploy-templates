@@ -1,0 +1,37 @@
+parameters:
+
+- name: azureSubscription
+  type: string
+- name: storage
+  type: string
+  
+steps:
+
+  - task: AzureCLI@2
+    displayName: Modyfing ShutterPage/Shutter-Page.html
+    inputs:
+      azureSubscription: ${{parameters.azureSubscription}}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        sed -i 's/devrwddbssa1402/'${{ parameters.storage }}'/' ShutterPage/Shutter-Page.html
+        cat ShutterPage/Shutter-Page.html | grep -i "base href"
+
+  - task: CopyFiles@2
+    displayName: 'Copy static website content'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/ShutterPage'
+      contents: '**'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      CleanTargetFolder: true
+  
+  - task: AzureCLI@2
+    displayName: Copy static website files to blob container
+    inputs:
+        azureSubscription: ${{ parameters.azureSubscription }}
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az account set -s ${{ parameters.azureSubscription }}
+          az storage blob upload-batch -d '$web' -s '$(Build.ArtifactStagingDirectory)' --account-name ${{ parameters.storage }} --overwrite true
+        CleanTargetBeforeCopy: true

@@ -1,0 +1,52 @@
+parameters:
+- name: imageTag
+  type: string
+  default: 'latest'
+- name: azureSubscription
+  type: string
+- name: acrName
+  type: string
+- name: registryName
+  type: string
+- name: serviceName
+  type: string
+- name: targetEnvironment
+  type: string
+
+jobs:
+- deployment: 'DeployAppCode'
+  environment: ${{ parameters.targetEnvironment }}
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - bash: |
+              echo "Deploying dockerImage -->"${{ parameters.registryName }}:${{ parameters.imageTag }} " to env --> "${{ parameters.targetEnvironment }}
+            displayName: "Show Environment Details"
+
+          - ${{ if ne(parameters.targetEnvironment, 'development') }}:
+            # Obtain Docker Password
+            - task: AzureKeyVault@2
+              displayName: 'Obtain Docker Password'
+              inputs:
+                azureSubscription: 'AZD-RWD-DEV1'
+                KeyVaultName: 'DEVRWDINFKV1401'
+                SecretsFilter: 'DockerPassword'
+                RunAsPreJob: true
+            # Copy the image from Dev ACR (release candidate) to Target ACR
+            - task: AzureCLI@2
+              displayName: 'Copy Image to ${{ parameters.targetEnvironment }}'
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                scriptType: 'pscore'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                  az acr login --name ${{ parameters.acrName }}
+                  az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
+
+          - task: AzureFunctionAppContainer@1
+            displayName: 'Deploy code to Function app: ${{ parameters.serviceName }}'
+            inputs:
+              azureSubscription: ${{ parameters.azureSubscription }}
+              appName: ${{ parameters.serviceName }}
+              imageName: ${{ parameters.acrName }}.azurecr.io/${{ parameters.registryName }}:${{ parameters.imageTag }}

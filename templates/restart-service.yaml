@@ -1,0 +1,31 @@
+parameters:
+  - name: subscriptionName
+    type: string
+  - name: webResourceGroupName
+    type: string
+  - name: serviceName
+    type: string
+  - name: targetEnvironment
+    type: string
+
+jobs:
+- deployment: RestartService
+  displayName: Restart ${{ parameters.serviceName }}
+  environment: ${{ parameters.targetEnvironment }}
+  dependsOn: DeployAppCode
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureCLI@2
+          displayName: Restart ${{ parameters.serviceName }}
+          inputs:
+            azureSubscription: ${{ parameters.subscriptionName }}
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+                echo "Restarting " ${{ parameters.serviceName }}
+                az webapp restart \
+                  --name ${{ parameters.serviceName }} \
+                  --resource-group ${{ parameters.webResourceGroupName }} \
+                  --subscription ${{ parameters.subscriptionName }}

@@ -1,0 +1,47 @@
+﻿parameters:
+  - name: solutionFolder
+    type: string
+    default: ''
+  - name: testProjectFolder
+    type: string
+    default: ''
+  - name: componentDirectory
+    type: string
+    default: ''
+
+steps:
+  - script: |
+      echo '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
+
+  - task: dependency-check-build-task@6
+    displayName: "Owasp Dependency Check"
+    retryCountOnTaskFailure: 3
+    inputs:
+      projectName: 'owasptest'
+      scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
+      format: 'XML, HTML'
+
+  - task: DownloadBuildArtifacts@1
+    displayName: 'Download Pipeline Artifact'
+    inputs:
+      buildType: 'current'
+      downloadType: 'specific'
+      itemPattern: '**'
+      downloadPath: '$(Common.TestResultsDirectory)'
+      cleanDestinationFolder: false
+
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(Common.TestResultsDirectory)'
+      Contents: '**'
+      TargetFolder: '$(System.DefaultWorkingDirectory)'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: 'dependency-check/dependency-check-report.xml'
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+      testRunTitle: 'Dependency Check'
+      buildPlatform: 'owasp'
+      mergeTestResults: 'true'
+      buildConfiguration: '$(BuildConfiguration)'

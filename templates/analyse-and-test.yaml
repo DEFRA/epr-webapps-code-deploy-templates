@@ -1,0 +1,65 @@
+parameters:
+  - name: solutionFolder
+    type: string
+    default: ''
+  - name: sonarQubeProjectKey
+    type: string
+  - name: sonarQubeProjectName
+    type: string
+  - name: runTests
+    type: boolean
+    default: true
+  - name: runNugetTasks
+    type: boolean
+    default: true
+
+steps:
+  - script: |
+      echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+
+  - task: SonarQubePrepare@5
+    inputs:
+      SonarQube: 'SonarQube'
+      scannerMode: 'MSBuild'
+      projectKey: '${{parameters.sonarQubeProjectKey}}'
+      projectName: '${{parameters.sonarQubeProjectName}}'
+      extraProperties: sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+  - task: UseDotNet@2
+    inputs:
+      version: '6.x'
+
+  - task: NuGetAuthenticate@1
+    displayName: 'Authenticate to NuGet'
+    condition: eq(${{parameters.runNugetTasks}}, true)
+
+  - task: DotNetCoreCLI@2
+    displayName: 'NuGet Restore'
+    condition: eq(${{parameters.runNugetTasks}}, true)
+    inputs:
+      command: 'restore'
+      projects: '**/*.sln'
+      feedsToUse: 'config'
+      nugetConfigPath: '${{parameters.solutionFolder}}/NuGet.Config'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Build'
+    inputs:
+      command: build
+      projects: '**/*.csproj'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Unit Tests'
+    condition: eq(${{parameters.runTests}}, true)
+    inputs:
+      command: test
+      projects: '**/*[Uu]nit[Tt]ests/*.csproj'
+      arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
+      publishTestResults: true
+
+  - task: SonarQubeAnalyze@5.13.0
+
+  - task: SonarQubePublish@5
+    retryCountOnTaskFailure: 5
+    inputs:
+      pollingTimeoutSec: '200'
