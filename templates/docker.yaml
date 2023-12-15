@@ -52,34 +52,44 @@ steps:
       inlineScript: |
         docker images
         az acr login --name ${{parameters.azureContainerRegistryName}}
-        docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
-        docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
-        if [ ${{parameters.branchName}} = 'main' ]
+        if [[ $(branchName) == 'main' ]]
           then
-            echo -e "\033[0;32m Adding latest tag to the image"
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.branchName}}-latest
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.branchName}}-latest
+            echo -e "\033[0;32m Procesing MAIN image - adding latest to the image's tag"
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-latest
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-latest
+
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
+
+        elif [[ $(branchName) == releases* ]]
+          then
+            echo -e "\033[0;32m Procesing RELEASES image - removing date stamp from the image's tag"
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
+
+            az acr repository update \
+            --name ${{parameters.azureContainerRegistryName}} --image ${{parameters.repositoryName}}:$(branchName) \
+            --delete-enabled false --write-enabled false
+
+        else
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
         fi
 
-  - ${{ if startsWith(parameters['branchName'], 'releases') }}:
-    - task: AzureCLI@2
-      displayName: 'Locking Docker Image if RELEASE'
-      inputs:
-        azureSubscription: ${{parameters.azureSubscription}}
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          docker images
-          az acr login --name ${{parameters.azureContainerRegistryName}}
-          if [[ $(branchName) == releases* ]]
-            then
-              echo -e "\033[0;32m This is release branch - setting lock"
-              az acr repository update \
-              --name ${{parameters.azureContainerRegistryName}} --image ${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber) \
-              --delete-enabled false --write-enabled false
-          fi
-
   - bash: |
+        echo "Source branch:"
+        echo ${{variables['Build.SourceBranch']}}
+        echo " "
+
         echo "Name of the image pushed to Azure Container Registry:"
-        echo $(branchName)-$(Build.BuildNumber)
+        if [[ $(branchName) == 'main' ]]
+          then
+            echo -e "\033[0;32m $(branchName)-latest"
+            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
+        elif [[ $(branchName) == releases* ]]
+          then
+            echo -e "\033[0;32m $(branchName)"
+        else
+            echo -e "\033[0;32m echo $(branchName)-$(Build.BuildNumber)"
+        fi
     displayName: "NAME OF THE IMAGE"
