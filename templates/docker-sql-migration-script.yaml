@@ -48,45 +48,5 @@ steps:
       inlineScript: |
         docker images
         az acr login --name ${{parameters.azureContainerRegistryName}}
-
-        if [[ $(branchName) == 'main' ]]
-          then
-            echo -e "\033[0;32m Procesing MAIN image - adding latest tag to the image's tag"
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-latest-database-migrations
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-latest-database-migrations
-
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
-
-        elif [[ $(branchName) == releases* ]]
-          then
-            echo -e "\033[0;32m Procesing RELEASES image - removing date stamp from the image's tag"
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-database-migrations
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-database-migrations
-
-            az acr repository update \
-            --name ${{parameters.azureContainerRegistryName}} --image ${{parameters.repositoryName}}:$(branchName)-database-migrations \
-            --delete-enabled false --write-enabled false
-
-        else
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
-        fi
-
-  - bash: |
-        echo "Source branch:"
-        echo ${{variables['Build.SourceBranch']}}
-        echo " "
-
-        echo "Name of the image pushed to Azure Container Registry:"
-        if [[ $(branchName) == 'main' ]]
-          then
-            echo -e "\033[0;32m $(branchName)-latest-database-migrations"
-            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)-database-migrations"
-        elif [[ $(branchName) == releases* ]]
-          then
-            echo -e "\033[0;32m $(branchName)-database-migrations"
-        else
-            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)-database-migrations"
-        fi
-    displayName: "NAME OF THE IMAGE"
+        docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
+        docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
