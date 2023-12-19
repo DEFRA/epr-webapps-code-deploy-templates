@@ -1,0 +1,18 @@
+parameters:
+  - name: scanLocation
+    type: string
+  - name: configPath
+    type: string
+  - name: failOnSecretDetection
+    type: boolean
+    default: true
+
+steps:
+  - task: Gitleaks@2
+    inputs:
+      scanmode: 'all'
+      scanlocation: '${{ parameters.scanLocation }}'
+      configtype: 'custom'
+      configfile: '${{ parameters.configPath }}'
+      redact: false
+      taskfail: ${{ parameters.failOnSecretDetection }}

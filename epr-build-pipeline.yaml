@@ -34,6 +34,9 @@ parameters:
   type: boolean
   default: false
 # temporarily defaulted to false due to 3rd party issue
+- name: gitleaksFailOnSecretDetection
+  type: boolean
+  default: false
 
 stages:
   - stage: Validate
@@ -48,6 +51,21 @@ stages:
               sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
+
+      - job: RunGitleaksSecretScan
+        displayName: Run Gitleaks Secret Scan
+        dependsOn: ''
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: CommonTemplates
+          - checkout: self
+            fetchDepth: 0
+          - template: templates/gitleaks-scan.yaml
+            parameters:
+              scanLocation: $(Build.SourcesDirectory)/$(Build.Repository.Name)
+              configPath: $(Build.SourcesDirectory)/epr-webapps-code-deploy-templates/configuration/gitleaks.toml
+              failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
 
       - ${{ if eq(parameters.runOWASPScan, true) }}:
         - job: RunOWASPTests
