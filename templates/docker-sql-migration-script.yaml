@@ -24,7 +24,7 @@ steps:
 
   - bash: |
         echo "Automated run for $(System.PullRequest.SourceBranch)"
-        newBranchNameIs=`echo $(System.PullRequest.SourceBranch) | sed s/"-"/"_"/ | sed s/"refs\/heads\/"//`
+        newBranchNameIs=`echo $(System.PullRequest.SourceBranch) | sed s/"refs\/heads\/"// | sed s/"-"/"_"/g | sed s/"\/"/"_"/g`
         echo newBranchNameIs $newBranchNameIs
         echo "##vso[task.setvariable variable=branchName;]$newBranchNameIs"
     displayName: "Set new branch name if PullRequest"
