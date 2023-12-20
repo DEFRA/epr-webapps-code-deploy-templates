@@ -57,14 +57,26 @@ stages:
         dependsOn: ''
         pool:
           vmImage: ubuntu-latest
+        variables: 
+        - name: commonTemplatesRepoSubDir
+          value: s/CommonTemplates
+        - name: commonTemplatesRepoRoot
+          value: $(Pipeline.Workspace)/${{ variables.commonTemplatesRepoSubDir }}
+        - name: sourceRepoSubDir
+          value: s/source
+        - name: sourceRepoRoot
+          value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
         steps:
           - checkout: CommonTemplates
+            path: ${{ variables.commonTemplatesRepoSubDir }}
+            clean: true
           - checkout: self
+            path: ${{ variables.sourceRepoSubDir }}
             fetchDepth: 0
           - template: templates/gitleaks-scan.yaml
             parameters:
-              scanLocation: $(Build.SourcesDirectory)/$(Build.Repository.Name)
-              configPath: $(Build.SourcesDirectory)/epr-webapps-code-deploy-templates/configuration/gitleaks.toml
+              scanLocation: $(sourceRepoRoot)
+              configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
               failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
 
       - ${{ if eq(parameters.runOWASPScan, true) }}:
