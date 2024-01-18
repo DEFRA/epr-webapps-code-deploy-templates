@@ -37,6 +37,9 @@ parameters:
 - name: gitleaksFailOnSecretDetection
   type: boolean
   default: false
+- name: serviceName
+  type: string
+  default: ''
 
 stages:
   - stage: Validate

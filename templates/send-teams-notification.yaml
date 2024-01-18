@@ -1,0 +1,53 @@
+parameters:
+  - name: webhookUrl
+  - name: message
+  - name: condition
+    default: ''
+  - name: displayName
+    default: Post message to Teams
+
+steps:
+  - bash: |
+      buildUri=$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
+      echo "##vso[task.setvariable variable=buildUri]${buildUri}"
+    displayName: Set Variable
+
+  - bash: |
+      curl -v -X POST ${{ parameters.webhookUrl }} \
+        -H 'Content-Type: application/json; charset=utf-8' \
+        --data-binary @- << EOF
+        {
+          "type":"message",
+          "attachments":[
+            {
+              "contentType":"application/vnd.microsoft.card.adaptive",
+              "contentUrl":null,
+              "content":{
+                "$schema":"http://adaptivecards.io/schemas/adaptive-card.json",
+                "type":"AdaptiveCard",
+                "version":"1.6",
+                "body":[
+                  {
+                    "type": "TextBlock",
+                    "text": "${{ parameters.message }}",
+                    "wrap": true
+                  },
+                  {
+                    "type": "ActionSet",
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "Show Build",
+                        "url": "$(buildUri)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      EOF      
+    displayName: ${{ parameters.displayName }}
+    ${{ if parameters.condition }}:
+      condition: ${{ parameters.condition }}
