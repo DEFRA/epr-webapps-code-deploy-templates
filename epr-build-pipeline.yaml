@@ -42,7 +42,7 @@ parameters:
   default: ''
 
 stages:
-  - stage: Validate
+  - stage: ValidateAndBuild
     jobs:
       - job: RunTests
         displayName: Run Static Code Analysis and Tests
@@ -119,3 +119,31 @@ stages:
               azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
               repositoryName: ${{ parameters.acrRepositoryName }}
               branchName: ${{ parameters.branchName }}
+      
+  - stage: DeployToDev4
+    jobs:
+      - job: DeployLatestMainDev4
+        displayName: Deploy Latest Main to Dev4
+        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
+        steps:
+          - template: templates/deployment.yaml
+            parameters:
+              imageTag: 'main-latest'
+              azureSubscription: 'AZD-RWD-DEV4'
+              acrName: ${{ parameters.acrAzureContainerRegistryName }}
+              registryName: ${{ parameters.acrRepositoryName }}
+              serviceName: ${{ parameters.serviceName }}
+              targetEnvironment: 'development'
+      
+      - job: RunLatestSQLMigrationDev4
+        displayName: Run latest SQL Migration for Dev4
+        condition: and(succeeded(), eq('${{parameters.buildMigrationScript}}', true), eq(variables['build.sourceBranch'], 'refs/heads/main'))
+        steps:
+          - template: templates/docker-run-sql-migration.yaml@CommonTemplates
+            parameters:
+              azureSubscription: ${{ parameters.azureSubscription }}
+              solutionFolder: ${{ parameters.solutionFolder }}
+              projectFolder: ${{ parameters.projectFolder }}
+              azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
+              repositoryName: ${{ parameters.acrRepositoryName }}
+              branchName: 'main-latest'

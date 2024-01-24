@@ -57,7 +57,7 @@ steps:
       arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
       publishTestResults: true
 
-  - task: SonarQubeAnalyze@5.13.0
+  - task: SonarQubeAnalyze@5
 
   - task: SonarQubePublish@5
     retryCountOnTaskFailure: 5
