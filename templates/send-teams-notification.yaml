@@ -11,6 +11,8 @@ steps:
       buildUri=$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
       echo "##vso[task.setvariable variable=buildUri]${buildUri}"
     displayName: Set Variable
+    ${{ if parameters.condition }}:
+      condition: ${{ parameters.condition }}
 
   - bash: |
       curl -v -X POST ${{ parameters.webhookUrl }} \
