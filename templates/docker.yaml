@@ -75,10 +75,6 @@ steps:
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
 
-            az acr repository update \
-            --name ${{parameters.azureContainerRegistryName}} --image ${{parameters.repositoryName}}:$(branchName) \
-            --delete-enabled false --write-enabled false
-
         else
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
