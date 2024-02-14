@@ -53,47 +53,60 @@ steps:
       DockerRepository: ${{ parameters.registryName }}
       DockerImageTag: ${{ parameters.imageTag }}
 
-  # - task: AzureCLI@2
-  #   displayName: 'Restart Service - ${{ parameters.serviceName }}'
-  #   inputs:
-  #     azureSubscription: ${{ parameters.azureSubscription }}
-  #     scriptType: 'pscore'
-  #     scriptLocation: 'inlineScript'
-  #     inlineScript: |
-  #       Set-StrictMode -Version 3.0
+  - task: AzureCLI@2
+    displayName: 'Restart Service - ${{ parameters.serviceName }}'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        Set-StrictMode -Version 3.0
 
-  #       $serviceName = "${{ parameters.serviceName }}".ToUpper()
+        $serviceName = "${{ parameters.serviceName }}".ToUpper()
 
-  #       if ($serviceName -match "devrwdwebwa") {
-  #         Write-Host "Restarting WA $serviceName"
-  #         $ids = az webapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
-  #         az webapp restart --ids $ids
-  #       } elseif ($serviceName -match "devrwdwebfa") {
-  #         Write-Host "Restarting FA $serviceName"
-  #         $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
-  #         az functionapp restart --ids $ids
-  #       } else {
-  #         Write-Error "Unknown Service Type"
-  #         exit 1
-  #       }
+        if ($serviceName -match "rwdwebwa") {
+          Write-Host "Restarting WA $serviceName"
+          $ids = az webapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
+          az webapp restart --ids $ids
+        } elseif ($serviceName -match "rwdwebfa") {
+          Write-Host "Restarting FA $serviceName"
+          $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
+          az functionapp restart --ids $ids
+        } else {
+          Write-Error "Unknown Service Type"
+          exit 1
+        }
 
-  # - task: AzureKeyVault@2
-  #   condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
-  #   displayName: 'Obtain WebhookUrl'
-  #   inputs:
-  #     azureSubscription: 'AZD-RWD-DEV1'
-  #     KeyVaultName: 'DEVRWDINFKV1401'
-  #     SecretsFilter: 'TeamsNotificationWebhook'
+  - task: AzureKeyVault@2
+    condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
+    displayName: 'Obtain WebhookUrl'
+    inputs:
+      azureSubscription: 'AZD-RWD-DEV1'
+      KeyVaultName: 'DEVRWDINFKV1401'
+      SecretsFilter: 'TeamsNotificationWebhook, TeamsNotificationWebhookEviden'
   
-  # - template: send-teams-notification.yaml
-  #   parameters:
-  #     condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
-  #     webhookUrl: $(TeamsNotificationWebhook)
-  #     message: |
-  #       Summary: Deployed ${{ parameters.registryName }}:${{ parameters.imageTag }} to ${{ parameters.serviceName }} in ${{ parameters.azureSubscription }} \n
-  #       Repository: $(Build.Repository.Name) \n
-  #       CommitID: $(Build.SourceVersion) \n
-  #       Pipeline: $(Build.DefinitionName) \n
-  #       Service: ${{ parameters.serviceName }} \n
-  #       Target: ${{ parameters.registryName }}:${{ parameters.imageTag }} \n
-  #       Subscription: ${{ parameters.azureSubscription }}
+  - template: send-teams-notification.yaml
+    parameters:
+      condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
+      webhookUrl: $(TeamsNotificationWebhook)
+      message: |
+        Summary: Deployed ${{ parameters.registryName }}:${{ parameters.imageTag }} to ${{ parameters.serviceName }} in ${{ parameters.azureSubscription }} \n
+        Repository: $(Build.Repository.Name) \n
+        CommitID: $(Build.SourceVersion) \n
+        Pipeline: $(Build.DefinitionName) \n
+        Service: ${{ parameters.serviceName }} \n
+        Target: ${{ parameters.registryName }}:${{ parameters.imageTag }} \n
+        Subscription: ${{ parameters.azureSubscription }}
+  
+  - template: send-teams-notification.yaml
+    parameters:
+      condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
+      webhookUrl: $(TeamsNotificationWebhookEviden)
+      message: |
+        Summary: Deployed ${{ parameters.registryName }}:${{ parameters.imageTag }} to ${{ parameters.serviceName }} in ${{ parameters.azureSubscription }} \n
+        Repository: $(Build.Repository.Name) \n
+        CommitID: $(Build.SourceVersion) \n
+        Pipeline: $(Build.DefinitionName) \n
+        Service: ${{ parameters.serviceName }} \n
+        Target: ${{ parameters.registryName }}:${{ parameters.imageTag }} \n
+        Subscription: ${{ parameters.azureSubscription }}
