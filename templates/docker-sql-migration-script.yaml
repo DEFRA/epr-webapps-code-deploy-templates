@@ -72,10 +72,8 @@ steps:
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-database-migrations
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-database-migrations
 
-            az acr repository update \
-            --name ${{parameters.azureContainerRegistryName}} --image ${{parameters.repositoryName}}:$(branchName)-database-migrations \
-            --delete-enabled false --write-enabled false
-
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
         else
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)-database-migrations
