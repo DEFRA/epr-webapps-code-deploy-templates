@@ -68,7 +68,7 @@ steps:
 
         elif [[ $(branchName) == releases* ]]
           then
-            echo -e "\033[0;32m Procesing RELEASES image - removing date stamp from the image's tag"
+            echo -e "\033[0;32m Procesing RELEASES image"
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber)-database-migrations ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-database-migrations
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-database-migrations
 
@@ -92,6 +92,7 @@ steps:
         elif [[ $(branchName) == releases* ]]
           then
             echo -e "\033[0;32m $(branchName)-database-migrations"
+            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)-database-migrations"
         else
             echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)-database-migrations"
         fi

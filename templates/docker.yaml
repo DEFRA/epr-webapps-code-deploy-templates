@@ -71,7 +71,7 @@ steps:
 
         elif [[ $(branchName) == releases* ]]
           then
-            echo -e "\033[0;32m Procesing RELEASES image - removing date stamp from the image's tag"
+            echo -e "\033[0;32m Procesing RELEASES image"
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
 
@@ -96,6 +96,7 @@ steps:
         elif [[ $(branchName) == releases* ]]
           then
             echo -e "\033[0;32m $(branchName)"
+            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
         else
             echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
         fi
