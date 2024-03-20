@@ -67,3 +67,55 @@ steps:
     retryCountOnTaskFailure: 5
     inputs:
       pollingTimeoutSec: '200'
+
+  - task: AzureKeyVault@2
+    displayName: 'Obtain WebhookUrl'
+    inputs:
+      azureSubscription: 'AZD-RWD-DEV1'
+      KeyVaultName: 'DEVRWDINFKV1401'
+      SecretsFilter: 'EPRADO-SonarQubeToken'
+
+  - powershell: |
+        if ("$(Build.Reason)" -eq "PullRequest")
+        {
+          Write-Host "RepoProvider:" $(Build.Repository.Provider)
+          Switch ("$(Build.Repository.Provider)") {
+            "TfsGit" { $pullRequestId = "$(System.PullRequest.PullRequestId)" }
+            "GitHub" { $pullRequestId = "$(System.PullRequest.PullRequestNumber)" }
+            Default { Write-Host "Build.Repository.Provider '$(Build.Repository.Provider)' was unexpected"; exit 1 }
+          }
+          Write-Host "Checking SonarQube results for" ${{parameters.sonarQubeProjectKey}} "from pull request" $pullRequestId
+          $qualifier = '&pullRequest='+$pullRequestId
+        }
+        else
+        {
+          $branchName = "$(Build.SourceBranch)".Replace('refs/heads/', '')
+          Write-Host "Checking SonarQube results for" ${{parameters.sonarQubeProjectKey}} "from branch" $branchName
+          $escapedBranchName = [system.uri]::EscapeDataString("$branchName")
+          $qualifier = '&branch='+$escapedBranchName
+        }
+        Switch ("${{parameters.sonarqubeInstance}}") {
+          "SonarQube" { $instanceUrlPart = "vss-sonarqube.azure.defra.cloud" }
+          "SonarQubeLatest" {
+            $sonarQubeApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(${EPRADO-SonarQubeToken} + ":"))
+            $headers = @{
+              "Authorization" = "Basic $sonarQubeApiToken"
+              "Accept" = "application/json"
+            };
+            $instanceUrlPart = "vss-sonarqube-upgrade.azure.defra.cloud" 
+          }
+          Default { Write-Host "parameters.sonarqubeInstance '${{parameters.sonarqubeInstance}}' was unexpected"; exit 1 }
+        }
+        $uri = "https://$instanceUrlPart/api/qualitygates/project_status?projectKey=${{parameters.sonarQubeProjectName}}" + $qualifier
+        Write-Host "SonarQube URI = " $uri
+        $qualityGateStatus = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get;
+        if ($qualityGateStatus.projectStatus.status -eq "OK") {
+          Write-Host "Quality Gate Succeeded";
+          exit 0; # all is good, quit here
+        } else {
+          Write-Host "Quality Gate failed. Stopping the build." -ForegroundColor Red
+          $qualityGateStatus | ConvertTo-Json | Write-Host;
+          # exit 1 - HARD FAIL COMING SOON!
+          # $gateErrors = $qualityGateStatus.projectStatus.conditions | Where-Object {$_.status -eq "ERROR" };
+        }
+    displayName: Check SonarQube Quality Gate
