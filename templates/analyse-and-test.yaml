@@ -69,7 +69,7 @@ steps:
       pollingTimeoutSec: '200'
 
   - task: AzureKeyVault@2
-    displayName: 'Obtain WebhookUrl'
+    displayName: 'Obtain SonarQube Token from Keyvault'
     inputs:
       azureSubscription: 'AZD-RWD-DEV1'
       KeyVaultName: 'DEVRWDINFKV1401'
@@ -108,13 +108,21 @@ steps:
         }
         $uri = "https://$instanceUrlPart/api/qualitygates/project_status?projectKey=${{parameters.sonarQubeProjectName}}" + $qualifier
         Write-Host "SonarQube URI = " $uri
-        $qualityGateStatus = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get;
+        try {
+          $qualityGateStatus = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get;
+        }
+        catch {
+          Write-Host "ERROR GETTING SONARQUBE STATUS: " $_
+          exit 0
+        }
         if ($qualityGateStatus.projectStatus.status -eq "OK") {
           Write-Host "Quality Gate Succeeded";
           exit 0; # all is good, quit here
         } else {
           Write-Host "Quality Gate failed. Stopping the build." -ForegroundColor Red
           $qualityGateStatus | ConvertTo-Json | Write-Host;
+          $webUrl = "https://vss-sonarqube.azure.defra.cloud/dashboard?id=$projectKey" + $qualifier;
+          Write-Host "SonarQube link (needs VPN)" $webUrl
           # exit 1 - HARD FAIL COMING SOON!
           # $gateErrors = $qualityGateStatus.projectStatus.conditions | Where-Object {$_.status -eq "ERROR" };
         }
