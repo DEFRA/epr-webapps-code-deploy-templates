@@ -121,7 +121,7 @@ steps:
         } else {
           Write-Host "Quality Gate failed. Stopping the build." -ForegroundColor Red
           $qualityGateStatus | ConvertTo-Json | Write-Host;
-          $webUrl = "https://vss-sonarqube.azure.defra.cloud/dashboard?id=$projectKey" + $qualifier;
+          $webUrl = "https://$instanceUrlPart/dashboard?id=${{parameters.sonarQubeProjectName}}" + $qualifier;
           Write-Host "SonarQube link (needs VPN)" $webUrl
           # exit 1 - HARD FAIL COMING SOON!
           # $gateErrors = $qualityGateStatus.projectStatus.conditions | Where-Object {$_.status -eq "ERROR" };
