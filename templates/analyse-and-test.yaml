@@ -119,10 +119,12 @@ steps:
           Write-Host "Quality Gate Succeeded";
           exit 0; # all is good, quit here
         } else {
-          Write-Host "Quality Gate failed. Stopping the build." -ForegroundColor Red
+          Write-Host "##vso[task.logissue type=warning;]Quality Gate failed."
           $qualityGateStatus | ConvertTo-Json | Write-Host;
           $webUrl = "https://$instanceUrlPart/dashboard?id=${{parameters.sonarQubeProjectName}}" + $qualifier;
-          Write-Host "SonarQube link (needs VPN)" $webUrl
+          Write-Host "SonarQube link (needs OpenVPN)" $webUrl
+          Write-Host "##vso[task.complete result=SucceededWithIssues;]"
+          # Write-Host "##[error]Quality Gate failed. Stopping the build."
           # exit 1 - HARD FAIL COMING SOON!
           # $gateErrors = $qualityGateStatus.projectStatus.conditions | Where-Object {$_.status -eq "ERROR" };
         }
