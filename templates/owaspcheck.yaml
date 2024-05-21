@@ -24,7 +24,10 @@ steps:
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta
         echo "Downloaded files:"
         ls -l $(Build.ArtifactStagingDirectory)
-
+  - script: |
+      echo "##vso[task.setvariable variable=BASE_PATH]$(Build.ArtifactStagingDirectory)"
+    displayName: 'Set Base Path Variable'
+  
   - task: dependency-check-build-task@6
     displayName: "Owasp Dependency Check"
     retryCountOnTaskFailure: 3
@@ -32,7 +35,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz --nvdDatafeed $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta'
+      additionalArguments: '--nvdDatafeed $(BASE_PATH)/nvdcve-1.1-2024.json.gz --nvdDatafeed $(BASE_PATH)/nvdcve-1.1-2024.meta'
       verbose: true
 
   - task: DownloadBuildArtifacts@1
