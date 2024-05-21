@@ -14,7 +14,7 @@ steps:
       echo '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
 
   - task: AzureCLI@2
-  inputs:
+    inputs:
     azureSubscription: 'AZD-RWD-DEV1'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
