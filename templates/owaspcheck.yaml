@@ -14,13 +14,16 @@ steps:
       echo '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
 
   - task: AzureCLI@2
+    displayName: "Download files from storage"
     inputs:
       azureSubscription: 'AZD-RWD-DEV1'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.json.gz --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz 
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta 
+        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta
+        echo "Downloaded files:"
+        ls -l $(Build.ArtifactStagingDirectory)
 
   - task: dependency-check-build-task@6
     displayName: "Owasp Dependency Check"
@@ -30,6 +33,7 @@ steps:
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
       additionalArguments: '--nvdDatafeed $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz --nvdDatafeed $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta'
+      verbose: true
 
   - task: DownloadBuildArtifacts@1
     displayName: 'Download Pipeline Artifact'
