@@ -24,6 +24,7 @@ steps:
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta
         echo "Downloaded files:"
         ls -l $(Build.ArtifactStagingDirectory)
+        
   - script: |
       echo "##vso[task.setvariable variable=BASE_PATH]$(Build.ArtifactStagingDirectory)"
     displayName: 'Set Base Path Variable'
