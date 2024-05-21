@@ -27,7 +27,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdApiKey $(OwaspNVDKey)'
+      additionalArguments: '--nvdDatafeed https://devrwdwebsa1401.blob.core.windows.net/owasp-file-storage/nvdcve-1.1-2024.json.gz --nvdDatafeed https://devrwdwebsa1401.blob.core.windows.net/owasp-file-storage/nvdcve-1.1-2024.meta'
 
   - task: DownloadBuildArtifacts@1
     displayName: 'Download Pipeline Artifact'
