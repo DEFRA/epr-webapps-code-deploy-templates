@@ -13,22 +13,13 @@ steps:
   - script: |
       echo '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
 
-  - task: AzureCLI@2
-    displayName: "Download files from storage"
-    inputs:
-      azureSubscription: 'AZD-RWD-DEV1'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.json.gz --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz 
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta
-        echo "Downloaded files:"
-        ls -l $(Build.ArtifactStagingDirectory)
+  - task: AzureKeyVault@2
+   displayName: 'Get Dev1 storage Key'
+   inputs:
+     azureSubscription: 'AZD-RWD-DEV1'
+     KeyVaultName: 'DEVRWDINFKV1401'
+     SecretsFilter: 'DEV1-storage-account-key'
         
-  - script: |
-      echo "##vso[task.setvariable variable=BASE_PATH]$(Build.ArtifactStagingDirectory)"
-    displayName: 'Set Base Path Variable'
-  
   - task: dependency-check-build-task@6
     displayName: "Owasp Dependency Check"
     retryCountOnTaskFailure: 3
@@ -36,7 +27,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed $(BASE_PATH)/nvdcve-1.1-2024.json.gz --nvdDatafeed $(BASE_PATH)/nvdcve-1.1-2024.meta'
+      additionalArguments: '--nvdDatafeed https://devrwdwebsa1401.blob.core.windows.net/owasp-file-storage/nvdcve-1.1-2024.json.gz --nvdDatafeed https://devrwdwebsa1401.blob.core.windows.net/owasp-file-storage/nvdcve-1.1-2024.meta'
       verbose: true
 
   - task: DownloadBuildArtifacts@1
