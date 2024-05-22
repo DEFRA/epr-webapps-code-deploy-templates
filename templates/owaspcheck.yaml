@@ -14,12 +14,30 @@ steps:
       echo '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
 
   - task: AzureKeyVault@2
-   displayName: 'Get Dev1 storage Key'
-   inputs:
+    displayName: 'Get Dev1 storage Key'
+    inputs:
      azureSubscription: 'AZD-RWD-DEV1'
      KeyVaultName: 'DEVRWDINFKV1401'
      SecretsFilter: 'DEV1-storage-account-key'
-        
+
+  - task: AzureCLI@2
+    inputs:
+     azureSubscription: 'AZD-RWD-DEV1'
+     scriptType: 'bash'
+     scriptLocation: 'inlineScript'
+     inlineScript: |
+        # Download the blobs using the connection string
+        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.json.gz --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz 
+        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta 
+        ls -l $(Build.ArtifactStagingDirectory)
+     displayName: 'Download files from blob'
+
+
+  - script: |
+      echo "Starting HTTP server using busybox..."
+      nohup busybox httpd -f -p 8000 -h $(Build.ArtifactStagingDirectory) &
+    displayName: 'Start HTTP Server with Busybox'
+
   - task: dependency-check-build-task@6
     displayName: "Owasp Dependency Check"
     retryCountOnTaskFailure: 3
@@ -27,7 +45,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed https://devrwdwebsa1401.blob.core.windows.net/owasp-file-storage/nvdcve-1.1-2024.json.gz --nvdDatafeed https://devrwdwebsa1401.blob.core.windows.net/owasp-file-storage/nvdcve-1.1-2024.meta'
+      additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta'
       verbose: true
 
   - task: DownloadBuildArtifacts@1
