@@ -57,6 +57,16 @@ steps:
       additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta'
       verbose: true
 
+  - script: |
+      cat $(Build.ArtifactStagingDirectory)/odc.log
+    displayName: 'Display Dependency Check Log'
+
+  - script: |
+      echo "Cleaning up..."
+      pkill busybox
+    displayName: 'Cleanup'
+    condition: always()
+
   - task: DownloadBuildArtifacts@1
     displayName: 'Download Pipeline Artifact'
     inputs:
