@@ -60,7 +60,8 @@ steps:
   - script: |
       cat $(Build.ArtifactStagingDirectory)/odc.log
     displayName: 'Display Dependency Check Log'
-
+    condition: always()
+    
   - script: |
       echo "Cleaning up..."
       pkill busybox
