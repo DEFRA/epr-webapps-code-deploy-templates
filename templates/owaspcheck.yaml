@@ -41,7 +41,9 @@ steps:
   - script: |
      echo "Testing HTTP server..."
      curl -I http://localhost:8000/nvdcve-1.1-2024.json.gz
-     curl -I nvdcve-1.1-2024.meta
+     curl -I http://localhost:8000/nvdcve-1.1-2024.meta
+     curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.json.gz
+     curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.meta
     displayName: 'Test HTTP Server'
 
 
