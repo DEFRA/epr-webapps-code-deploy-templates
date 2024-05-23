@@ -54,14 +54,14 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta'
+      additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta --log odc.log'
       verbose: true
 
   - script: |
       cat $(Build.ArtifactStagingDirectory)/odc.log
     displayName: 'Display Dependency Check Log'
     condition: always()
-    
+
   - script: |
       echo "Cleaning up..."
       pkill busybox
