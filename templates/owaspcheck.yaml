@@ -58,11 +58,11 @@ steps:
 
   - script: |
       echo "Displaying Dependency Check log..."
-      if (Test-Path "$(Build.ArtifactStagingDirectory)/odc.log") {
-          Get-Content "$(Build.ArtifactStagingDirectory)/odc.log"
-      } else {
-          Write-Output "Log file not found."
-      }
+      if [ -f "$(Build.ArtifactStagingDirectory)/odc.log" ]; then
+        cat "$(Build.ArtifactStagingDirectory)/odc.log"
+      else
+        echo "Log file not found."
+      fi
     displayName: 'Display Dependency Check Log'
     pwsh: true
 
