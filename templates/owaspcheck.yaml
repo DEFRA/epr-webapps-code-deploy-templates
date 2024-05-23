@@ -38,6 +38,13 @@ steps:
       nohup busybox httpd -f -p 8000 -h $(Build.ArtifactStagingDirectory) &
     displayName: 'Start HTTP Server with Busybox'
 
+  - script: |
+     echo "Testing HTTP server..."
+     curl -I http://localhost:8000/nvdcve-1.1-2024.json.gz
+     curl -I nvdcve-1.1-2024.meta
+    displayName: 'Test HTTP Server'
+
+
   - task: dependency-check-build-task@6
     displayName: "Owasp Dependency Check"
     retryCountOnTaskFailure: 3
