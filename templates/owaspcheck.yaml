@@ -64,7 +64,6 @@ steps:
         echo "Log file not found."
       fi
     displayName: 'Display Dependency Check Log'
-    pwsh: true
 
   - script: |
       echo "Cleaning up..."
