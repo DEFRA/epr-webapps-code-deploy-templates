@@ -47,11 +47,6 @@ steps:
     displayName: 'Test HTTP Server'
 
   - script: |
-      cat $(Build.ArtifactStagingDirectory)/odc.log
-    displayName: 'Display Dependency Check Log'
-    condition: always()
-
-  - script: |
       echo "Running Dependency Check..."
       /agent/_work/_tasks/dependency-check-build-task_47ea1f4a-57ba-414a-b12e-c44f42765e72/6.2.3/dependency-check/bin/dependency-check.sh --project owasptest --out $(Build.ArtifactStagingDirectory) --scan '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj' --format XML,HTML --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta --log $(Build.ArtifactStagingDirectory)/odc.log --verbose
     displayName: 'Run Dependency Check'
