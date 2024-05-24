@@ -29,6 +29,7 @@ steps:
         # Download the blobs using the connection string
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.json.gz --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz 
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta 
+        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name cache.properites --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/cache.properites
         ls -l $(Build.ArtifactStagingDirectory)
      displayName: 'Download files from blob'
 
@@ -42,8 +43,10 @@ steps:
      echo "Testing HTTP server..."
      curl -I http://localhost:8000/nvdcve-1.1-2024.json.gz
      curl -I http://localhost:8000/nvdcve-1.1-2024.meta
+     curl -I http://localhost:8000/cache.properites
      curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.json.gz
-     curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.meta
+     curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.json.gz
+     curl -o /dev/null http://localhost:8000/cache.properites
     displayName: 'Test HTTP Server'
 
   - task: dependency-check-build-task@6
@@ -53,7 +56,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta --log $(Build.ArtifactStagingDirectory)/odc.log'
+      additionalArguments: '--nvdDatafeed http://localhost:8000/cache.properites --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta --log $(Build.ArtifactStagingDirectory)/odc.log'
       verbose: true
 
   - script: |
