@@ -30,6 +30,8 @@ steps:
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.json.gz --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz 
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta 
         az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name cache.properties --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/cache.properties
+        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-modified.json.gz --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-modified.json.gz
+        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-modified.meta --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-modified.meta
         ls -l $(Build.ArtifactStagingDirectory)
      displayName: 'Download files from blob'
 
@@ -43,9 +45,13 @@ steps:
      echo "Testing HTTP server..."
      curl -I http://localhost:8000/nvdcve-1.1-2024.json.gz
      curl -I http://localhost:8000/nvdcve-1.1-2024.meta
+     curl -I http://localhost:8000/nvdcve-1.1-modified.json.gz
+     curl -I http://localhost:8000/nvdcve-1.1-modified.meta
      curl -I http://localhost:8000/cache.properties
      curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.json.gz
      curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.json.gz
+     curl -o /dev/null http://localhost:8000/nvdcve-1.1-modified.json.gz
+     curl -o /dev/null http://localhost:8000/nvdcve-1.1-modified.meta
      curl -o /dev/null http://localhost:8000/cache.properties
     displayName: 'Test HTTP Server'
 
@@ -56,7 +62,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed http://localhost:8000/cache.properties --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta --log $(Build.ArtifactStagingDirectory)/odc.log'
+      additionalArguments: '--nvdDatafeed http://localhost:8000/cache.properties --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta --nvdDatafeed http://localhost:8000/nvdcve-1.1-modified.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-modified.meta --log $(Build.ArtifactStagingDirectory)/odc.log'
       verbose: true
 
   - script: |
