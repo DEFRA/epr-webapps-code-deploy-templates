@@ -32,7 +32,7 @@ steps:
         netstat -tuln
         echo "Checking internet access:"
         curl -Is http://www.google.com | head -n 1
-    displayName: 'Start HTTP Server with Busybox'
+    displayName: 'test agent connection'
 
   - task: UseDotNet@2
     inputs:
