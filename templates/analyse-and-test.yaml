@@ -31,7 +31,7 @@ steps:
         echo "Checking open ports:"
         netstat -tuln
         echo "Checking internet access:"
-        curl -Is http://www.google.com | head -n 1
+        curl -Is https://dotnet.microsoft.com | head -n 1
     displayName: 'test agent connection'
 
   - task: UseDotNet@2
