@@ -28,6 +28,7 @@ steps:
       extraProperties: sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
   - task: AzureCLI@2
+    displayName: 'Test agent connection'
     inputs:
      scriptType: 'bash'
      scriptLocation: 'inlineScript'
@@ -36,7 +37,6 @@ steps:
         netstat -tuln
         echo "Checking internet access:"
         curl -Is http://www.google.com | head -n 1
-     displayName: 'Test agent connection'
 
   - task: UseDotNet@2
     inputs:
