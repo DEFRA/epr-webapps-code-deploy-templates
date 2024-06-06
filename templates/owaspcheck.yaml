@@ -62,7 +62,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.meta --nvdDatafeed http://localhost:8000/nvdcve-1.1-modified.json.gz --nvdDatafeed http://localhost:8000/nvdcve-1.1-modified.meta --nvdDatafeed http://localhost:8000/cache.properties --log $(Build.ArtifactStagingDirectory)/odc.log'
+      additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz http://localhost:8000/nvdcve-1.1-2024.meta http://localhost:8000/nvdcve-1.1-modified.json.gz http://localhost:8000/nvdcve-1.1-modified.meta http://localhost:8000/cache.properties --log $(Build.ArtifactStagingDirectory)/odc.log'
       verbose: true
 
   - script: |
