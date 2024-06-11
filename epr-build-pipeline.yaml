@@ -62,33 +62,33 @@ stages:
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
 
-  - ${{ if eq(parameters.runGitleaks, false) }}:     
-      - job: RunGitleaksSecretScan
-        displayName: Run Gitleaks Secret Scan
-        dependsOn: ''
-        pool:
-          vmImage: ubuntu-latest
-        variables: 
-        - name: commonTemplatesRepoSubDir
-          value: s/CommonTemplates
-        - name: commonTemplatesRepoRoot
-          value: $(Pipeline.Workspace)/${{ variables.commonTemplatesRepoSubDir }}
-        - name: sourceRepoSubDir
-          value: s/source
-        - name: sourceRepoRoot
-          value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
-        steps:
-          - checkout: CommonTemplates
-            path: ${{ variables.commonTemplatesRepoSubDir }}
-            clean: true
-          - checkout: self
-            path: ${{ variables.sourceRepoSubDir }}
-            fetchDepth: 0
-          - template: templates/gitleaks-scan.yaml
-            parameters:
-              scanLocation: $(sourceRepoRoot)
-              configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
-              failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
+      - ${{ if eq(parameters.runGitleaks, false) }}:     
+          - job: RunGitleaksSecretScan
+            displayName: Run Gitleaks Secret Scan
+            dependsOn: ''
+            pool:
+              vmImage: ubuntu-latest
+            variables: 
+            - name: commonTemplatesRepoSubDir
+              value: s/CommonTemplates
+            - name: commonTemplatesRepoRoot
+              value: $(Pipeline.Workspace)/${{ variables.commonTemplatesRepoSubDir }}
+            - name: sourceRepoSubDir
+              value: s/source
+            - name: sourceRepoRoot
+              value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
+            steps:
+              - checkout: CommonTemplates
+                path: ${{ variables.commonTemplatesRepoSubDir }}
+                clean: true
+              - checkout: self
+                path: ${{ variables.sourceRepoSubDir }}
+                fetchDepth: 0
+              - template: templates/gitleaks-scan.yaml
+                parameters:
+                  scanLocation: $(sourceRepoRoot)
+                  configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
+                  failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
 
       - ${{ if eq(parameters.runOWASPScan, true) }}:
         - job: RunOWASPTests
