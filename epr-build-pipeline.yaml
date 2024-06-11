@@ -33,6 +33,9 @@ parameters:
 - name: runOWASPScan
   type: boolean
   default: true
+- name: runGitleaks
+  type: boolean
+  default: false
 # temporarily defaulted to false due to 3rd party issue
 - name: gitleaksFailOnSecretDetection
   type: boolean
@@ -58,7 +61,8 @@ stages:
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-              
+
+  - ${{ if eq(parameters.runGitleaks, false) }}:     
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
         dependsOn: ''
