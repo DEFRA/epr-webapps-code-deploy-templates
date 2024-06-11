@@ -37,11 +37,9 @@ steps:
   
   - task: dependency-check-build-task@6
     inputs:
-      projectName: 'a-pete-test-project'
-      scanPath: 'a-pete-test-project/*.csproj'
-      format: 'HTML'
-      #uploadReports: true
-      #nvdApiKey: '$(OwaspNVDKey)'
+      projectName: 'owasptest'
+      scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
+      format: 'XML, HTML'
       additionalArguments: '--nvdApiKey $(OwaspNVDKey)'
 
   - task: DownloadBuildArtifacts@1
