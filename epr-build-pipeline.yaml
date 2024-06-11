@@ -62,7 +62,7 @@ stages:
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
 
-      - ${{ if eq(parameters.runGitleaks, false) }}:     
+      - ${{ if eq(parameters.runGitleaks, true) }}:     
           - job: RunGitleaksSecretScan
             displayName: Run Gitleaks Secret Scan
             dependsOn: ''
