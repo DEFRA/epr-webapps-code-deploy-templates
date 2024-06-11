@@ -53,8 +53,8 @@ stages:
           - template: templates/analyse-and-test.yaml
             parameters:
               solutionFolder: ${{ parameters.solutionFolder }}
-              #sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
-              #sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
+              sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
+              sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
