@@ -13,74 +13,36 @@ steps:
   - script: |
       echo '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
 
+  - task: Bash@3
+    displayName: 'Look for dependency-check data directory'
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Find for dependency-check root directory
+        dc_directory=$(find $AGENT_WORKFOLDER/_tasks -type d -name dependency-check)
+        echo "##vso[task.setvariable variable=DEPENDENCY_CHECK_DATA]${dc_directory}/data"
+
+  - task: Cache@2
+    displayName: Cache dependency check data
+    inputs:
+      key: 'dependency-check | "$(Agent.OS)"'
+      path: $(DEPENDENCY_CHECK_DATA)
+
   - task: AzureKeyVault@2
-    displayName: 'Get Dev1 storage Key'
+    displayName: 'Get OWASP NVD Key'
     inputs:
-     azureSubscription: 'AZD-RWD-DEV1'
-     KeyVaultName: 'DEVRWDINFKV1401'
-     SecretsFilter: 'DEV1-storage-account-key'
-
-  - task: AzureCLI@2
-    inputs:
-     azureSubscription: 'AZD-RWD-DEV1'
-     scriptType: 'bash'
-     scriptLocation: 'inlineScript'
-     inlineScript: |
-        # Download the blobs using the connection string
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.json.gz --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.json.gz 
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-2024.meta --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-2024.meta 
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name cache.properties --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/cache.properties
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-modified.json.gz --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-modified.json.gz
-        az storage blob download --account-name devrwdwebsa1401 --container-name owasp-file-storage --name nvdcve-1.1-modified.meta --account-key $(DEV1-storage-account-key) --file $(Build.ArtifactStagingDirectory)/nvdcve-1.1-modified.meta
-        ls -l $(Build.ArtifactStagingDirectory)
-     displayName: 'Download files from blob'
-
-
-  - script: |
-      echo "Starting HTTP server using busybox..."
-      nohup busybox httpd -f -p 8000 -h $(Build.ArtifactStagingDirectory) &
-    displayName: 'Start HTTP Server with Busybox'
-
-  - script: |
-     echo "Testing HTTP server..."
-     curl -I http://localhost:8000/nvdcve-1.1-2024.json.gz
-     curl -I http://localhost:8000/nvdcve-1.1-2024.meta
-     curl -I http://localhost:8000/nvdcve-1.1-modified.json.gz
-     curl -I http://localhost:8000/nvdcve-1.1-modified.meta
-     curl -I http://localhost:8000/cache.properties
-     curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.json.gz
-     curl -o /dev/null http://localhost:8000/nvdcve-1.1-2024.json.gz
-     curl -o /dev/null http://localhost:8000/nvdcve-1.1-modified.json.gz
-     curl -o /dev/null http://localhost:8000/nvdcve-1.1-modified.meta
-     curl -o /dev/null http://localhost:8000/cache.properties
-     ls -ld /agent/_work/_tasks/dependency-check-build-task_47ea1f4a-57ba-414a-b12e-c44f42765e72/6.2.3/dependency-check/data
-    displayName: 'Test HTTP Server'
-
+      azureSubscription: 'AZD-RWD-DEV1'
+      KeyVaultName: 'DEVRWDINFKV1401'
+      SecretsFilter: 'OwaspNVDKey'
+  
   - task: dependency-check-build-task@6
-    displayName: "Owasp Dependency Check"
-    retryCountOnTaskFailure: 3
     inputs:
-      projectName: 'owasptest'
-      scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
-      format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed http://localhost:8000/nvdcve-1.1-2024.json.gz http://localhost:8000/nvdcve-1.1-2024.meta http://localhost:8000/nvdcve-1.1-modified.json.gz http://localhost:8000/nvdcve-1.1-modified.meta http://localhost:8000/cache.properties --log $(Build.ArtifactStagingDirectory)/odc.log --verbose'
-      verbose: true
-
-  - script: |
-      echo "Displaying Dependency Check log..."
-      if [ -f "$(Build.ArtifactStagingDirectory)/odc.log" ]; then
-        cat "$(Build.ArtifactStagingDirectory)/odc.log"
-      else
-        echo "Log file not found."
-      fi
-    displayName: 'Display Dependency Check Log'
-    condition: always()
-
-  - script: |
-      echo "Cleaning up..."
-      pkill busybox
-    displayName: 'Cleanup'
-    condition: always()
+      projectName: 'a-pete-test-project'
+      scanPath: 'a-pete-test-project/*.csproj'
+      format: 'HTML'
+      #uploadReports: true
+      #nvdApiKey: '$(OwaspNVDKey)'
+      additionalArguments: '--nvdApiKey $(OwaspNVDKey)'
 
   - task: DownloadBuildArtifacts@1
     displayName: 'Download Pipeline Artifact'
