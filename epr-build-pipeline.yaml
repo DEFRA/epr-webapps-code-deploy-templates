@@ -51,17 +51,17 @@ stages:
   - stage: ValidateAndBuild
     jobs:
       - ${{ if eq(parameters.runbuildtests, true) }}:
-      - job: RunTests
-        displayName: Run Static Code Analysis and Tests
-        steps:
-          - template: templates/analyse-and-test.yaml
-            parameters:
-              solutionFolder: ${{ parameters.solutionFolder }}
-              sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
-              sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
-              runTests: ${{ parameters.runTests }}
-              runNugetTasks: ${{ parameters.runNugetTasks }}
-              sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
+        - job: RunTests
+          displayName: Run Static Code Analysis and Tests
+          steps:
+            - template: templates/analyse-and-test.yaml
+              parameters:
+                solutionFolder: ${{ parameters.solutionFolder }}
+                sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
+                sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
+                runTests: ${{ parameters.runTests }}
+                runNugetTasks: ${{ parameters.runNugetTasks }}
+                sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
               
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
