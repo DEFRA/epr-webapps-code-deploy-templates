@@ -13,16 +13,30 @@ steps:
   - script: |
       echo '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
 
+  - task: Bash@3
+    displayName: 'Look for dependency-check data directory'
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Find for dependency-check root directory
+        dc_directory=$(find $AGENT_WORKFOLDER/_tasks -type d -name dependency-check)
+        echo "##vso[task.setvariable variable=DEPENDENCY_CHECK_DATA]${dc_directory}/data"
+
+  - task: Cache@2
+    displayName: Cache dependency check data
+    inputs:
+      key: 'dependency-check | "$(Agent.OS)"'
+      path: $(DEPENDENCY_CHECK_DATA)
+
   - task: AzureKeyVault@2
     displayName: 'Get OWASP NVD Key'
     inputs:
       azureSubscription: 'AZD-RWD-DEV1'
       KeyVaultName: 'DEVRWDINFKV1401'
       SecretsFilter: 'OwaspNVDKey'
-
+  
   - task: dependency-check-build-task@6
-    displayName: "Owasp Dependency Check"
-    retryCountOnTaskFailure: 3
+    displayName: 'Dependency Check'
     inputs:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'

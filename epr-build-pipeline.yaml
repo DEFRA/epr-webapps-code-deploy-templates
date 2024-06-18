@@ -32,7 +32,7 @@ parameters:
   default: ''
 - name: runOWASPScan
   type: boolean
-  default: false
+  default: true
 # temporarily defaulted to false due to 3rd party issue
 - name: gitleaksFailOnSecretDetection
   type: boolean
