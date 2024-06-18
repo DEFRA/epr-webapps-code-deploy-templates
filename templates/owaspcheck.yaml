@@ -36,6 +36,7 @@ steps:
       SecretsFilter: 'OwaspNVDKey'
   
   - task: dependency-check-build-task@6
+    displayName: 'Dependency Check'
     inputs:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'

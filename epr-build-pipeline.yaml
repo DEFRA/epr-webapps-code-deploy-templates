@@ -33,9 +33,6 @@ parameters:
 - name: runOWASPScan
   type: boolean
   default: true
-- name: runbuildtests
-  type: boolean
-  default: false
 # temporarily defaulted to false due to 3rd party issue
 - name: gitleaksFailOnSecretDetection
   type: boolean
