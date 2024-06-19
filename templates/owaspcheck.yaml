@@ -34,7 +34,7 @@ steps:
       azureSubscription: 'AZD-RWD-DEV1'
       KeyVaultName: 'DEVRWDINFKV1401'
       SecretsFilter: 'OwaspNVDKey'
-  
+
   - task: dependency-check-build-task@6
     displayName: 'Dependency Check'
     inputs:
