@@ -17,7 +17,7 @@ parameters:
 
 steps:
   - script: |
-      echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+      echo '{"sdk":{"version":"8.0.100","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
 
   - task: SonarQubePrepare@5
     inputs:
@@ -29,7 +29,7 @@ steps:
 
   - task: UseDotNet@2
     inputs:
-      version: '6.x'
+      version: '8.0.100'
 
   - task: NuGetAuthenticate@1
     displayName: 'Authenticate to NuGet'
