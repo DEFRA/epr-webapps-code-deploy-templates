@@ -34,9 +34,6 @@ parameters:
   type: boolean
   default: true
 # temporarily defaulted to false due to 3rd party issue
-- name: gitleaksFailOnSecretDetection
-  type: boolean
-  default: false
 - name: serviceName
   type: string
   default: ''
@@ -84,7 +81,6 @@ stages:
             parameters:
               scanLocation: $(sourceRepoRoot)
               configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
-              failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
 
       - ${{ if eq(parameters.runOWASPScan, true) }}:
         - job: RunOWASPTests
