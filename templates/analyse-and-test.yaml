@@ -16,7 +16,7 @@ parameters:
     type: string
 
 steps:
-  - checkout: $(ocf-checkoutName)
+  - checkout: ${{parameters.solutionFolder}}
   - script: |
       echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
 
