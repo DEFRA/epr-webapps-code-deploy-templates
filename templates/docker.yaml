@@ -70,24 +70,24 @@ steps:
         if [[ $(branchName) == 'main' ]]
           then
             echo -e "\033[0;32m Procesing MAIN image - adding latest to the image's tag"
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-latest
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-latest
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-latest
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-latest
 
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-$(Build.BuildNumber)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-$(Build.BuildNumber)
 
         elif [[ $(branchName) == releases* ]]
           then
             echo -e "\033[0;32m Procesing RELEASES image"
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}
 
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-$(Build.BuildNumber)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-$(Build.BuildNumber)
 
         else
-            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
-            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-$(Build.BuildNumber)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.imageBranchName}}-$(Build.BuildNumber)
         fi
 
   - bash: |
@@ -98,13 +98,13 @@ steps:
         echo "Name of the image pushed to Azure Container Registry:"
         if [[ $(branchName) == 'main' ]]
           then
-            echo -e "\033[0;32m $(branchName)-latest"
-            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
+            echo -e "\033[0;32m ${{parameters.imageBranchName}}-latest"
+            echo -e "\033[0;32m ${{parameters.imageBranchName}}-$(Build.BuildNumber)"
         elif [[ $(branchName) == releases* ]]
           then
-            echo -e "\033[0;32m $(branchName)"
-            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
+            echo -e "\033[0;32m ${{parameters.imageBranchName}}"
+            echo -e "\033[0;32m ${{parameters.imageBranchName}}-$(Build.BuildNumber)"
         else
-            echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
+            echo -e "\033[0;32m ${{parameters.imageBranchName}}-$(Build.BuildNumber)"
         fi
     displayName: "NAME OF THE IMAGE"
