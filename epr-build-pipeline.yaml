@@ -102,6 +102,8 @@ stages:
                 solutionFolder: ${{ parameters.solutionFolder }}
                 testProjectFolder: ${{ parameters.testProjectFolder }}
                 componentDirectory: ${{ parameters.componentDirectory }}
+                branchName: ${{ parameters.branchName }}
+                checkoutName: ${{ parameters.checkoutName }}
 
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
