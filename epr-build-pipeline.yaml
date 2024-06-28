@@ -84,7 +84,6 @@ stages:
           # - checkout: self
           #  path: ${{ variables.sourceRepoSubDir }}
           #  fetchDepth: 0
-          - checkout: none
           - script: | 
               git clone --branch ${{parameters.branchName}} https://github.com/DEFRA/${{parameters.checkoutName}}.git ${{ variables.sourceRepoSubDir }}
           - template: templates/gitleaks-scan.yaml
