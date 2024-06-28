@@ -21,7 +21,7 @@ parameters:
 
 steps:
   - script: | 
-      git clone --branch ${parameters.branchName} https://github.com/DEFRA/${{parameters.checkoutName}}.git $(Build.SourcesDirectory)
+      git clone --branch ${{parameters.branchName}} https://github.com/DEFRA/${{parameters.checkoutName}}.git $(Build.SourcesDirectory)
   - script: |
       echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
 
