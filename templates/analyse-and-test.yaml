@@ -18,6 +18,7 @@ parameters:
 steps:
   - script: |
       echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+  - checkout: ObligationChecker
 
   - task: SonarQubePrepare@5
     inputs:
