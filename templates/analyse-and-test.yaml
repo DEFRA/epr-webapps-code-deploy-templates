@@ -20,7 +20,7 @@ parameters:
     type: string
 
 steps:
-  - checkout: git://github.com/defra/${{parameters.checkoutName}}.git
+  - checkout: git://github.com/DEFRA/${{parameters.checkoutName}}.git
     ref: ${{parameters.branchName}}
   - script: |
       echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
