@@ -19,6 +19,8 @@ parameters:
     type: string
   - name: branchName
     type: string
+  - name: checkoutName
+    type: string
 
 steps:
   - checkout: none
