@@ -10,7 +10,7 @@
     default: ''
   - name: branchName
     type: string
-  - name: solutionFolder
+  - name: checkoutName
     type: string
 
 steps:
