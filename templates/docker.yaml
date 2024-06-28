@@ -21,6 +21,9 @@ parameters:
     type: string
 
 steps:
+  - checkout: none
+  - script: | 
+      git clone --branch ${{parameters.branchName}} https://github.com/DEFRA/${{parameters.checkoutName}}.git $(Build.SourcesDirectory)
   - bash: |
         echo "##vso[task.setvariable variable=branchName;]${{ parameters.branchName }}"
     displayName: "Set new branch name"
