@@ -116,7 +116,7 @@ stages:
               projectFolder: ${{ parameters.projectFolder }}
               azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
               repositoryName: ${{ parameters.acrRepositoryName }}
-              branchName: ${{ parameters.branchName }}
+              branchName: ${{ replace(parameters.branchName, '/', '_') }}
               checkoutName: ${{ parameters.checkoutName }}
 
       - job: BuildAndPushSQLMigrationDockerImage
