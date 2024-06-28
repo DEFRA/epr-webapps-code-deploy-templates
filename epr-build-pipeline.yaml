@@ -47,7 +47,7 @@ parameters:
   type: string
 
 stages:
-  - stage: ValidateAndBuild
+  - stage: ValidateAndBuild_${{parameters.checkoutName}}
     jobs:
       - job: RunTests
         displayName: Run Static Code Analysis and Tests
@@ -134,7 +134,7 @@ stages:
               repositoryName: ${{ parameters.acrRepositoryName }}
               branchName: ${{ parameters.branchName }}
       
-  - stage: DeployToDev4
+  - stage: DeployToDev4_${{parameters.checkoutName}}
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
       - job: DeployLatestMainDev4
