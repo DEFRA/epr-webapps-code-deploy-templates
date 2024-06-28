@@ -43,6 +43,8 @@ parameters:
 - name: sonarqubeInstance
   type: string
   default: 'SonarQube'
+- name: checkoutName
+  type: string
 
 stages:
   - stage: ValidateAndBuild
@@ -58,6 +60,7 @@ stages:
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
+              checkoutName: ${{ parameters.checkoutName }}
               
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
