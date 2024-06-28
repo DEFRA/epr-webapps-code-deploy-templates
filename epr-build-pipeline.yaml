@@ -85,7 +85,7 @@ stages:
           #  path: ${{ variables.sourceRepoSubDir }}
           #  fetchDepth: 0
           - script: | 
-              git clone --branch ${{parameters.branchName}} https://github.com/DEFRA/${{parameters.checkoutName}}.git ${{ variables.sourceRepoSubDir }}
+              git clone --branch ${{parameters.branchName}} https://github.com/DEFRA/${{parameters.checkoutName}}.git /home/vsts/work/1/${{ variables.sourceRepoSubDir }}
           - template: templates/gitleaks-scan.yaml
             parameters:
               scanLocation: $(sourceRepoRoot)
