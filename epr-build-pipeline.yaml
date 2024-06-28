@@ -117,6 +117,7 @@ stages:
               azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
               repositoryName: ${{ parameters.acrRepositoryName }}
               branchName: ${{ parameters.branchName }}
+              checkoutName: ${{ parameters.checkoutName }}
 
       - job: BuildAndPushSQLMigrationDockerImage
         displayName: Build and Push Docker Image - Migration Script
