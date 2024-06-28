@@ -14,9 +14,11 @@ parameters:
     default: true
   - name: sonarqubeInstance
     type: string
+  - name: checkoutName
+    type: string
 
 steps:
-  - checkout: ${{parameters.solutionFolder}}
+  - checkout: 'https://github.com/defra/${{parameters.checkoutName}}.git'
   - script: |
       echo '{"sdk":{"version":"6.0.405","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
 
