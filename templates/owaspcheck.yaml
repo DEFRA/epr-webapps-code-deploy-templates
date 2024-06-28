@@ -8,6 +8,10 @@
   - name: componentDirectory
     type: string
     default: ''
+  - name: branchName
+    type: string
+  - name: solutionFolder
+    type: string
 
 steps:
   - checkout: none
