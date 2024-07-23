@@ -17,6 +17,7 @@ parameters:
 
 steps:
   - script: |
+      dotnet --list-sdks
       echo '{"sdk":{"version":"6.0.412","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
 
   - task: SonarQubePrepare@5
