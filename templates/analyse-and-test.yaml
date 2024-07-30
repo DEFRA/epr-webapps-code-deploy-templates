@@ -14,12 +14,20 @@ parameters:
     default: true
   - name: sonarqubeInstance
     type: string
-
+  - name: dotnetVersion
+    type: string
+    
 steps:
   - script: |
       dotnet --list-sdks
-      echo '{"sdk":{"version":"6.0.412","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
-
+      if [ "${{ parameters.dotnetVersion }}" == "dotnetVersion8" ]; then
+        echo '{"sdk":{"version":"8.0.303","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+        cat ${{ parameters.solutionFolder }}/global.json
+      else
+        echo '{"sdk":{"version":"6.0.424","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+        cat ${{ parameters.solutionFolder }}/global.json
+      fi
+      
   - task: SonarQubePrepare@6
     inputs:
       SonarQube: '${{ parameters.sonarqubeInstance }}'
@@ -27,10 +35,6 @@ steps:
       projectKey: '${{parameters.sonarQubeProjectKey}}'
       projectName: '${{parameters.sonarQubeProjectName}}'
       extraProperties: sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-
-  #- task: UseDotNet@2
-  #  inputs:
-  #    version: '6.x'
 
   - task: NuGetAuthenticate@1
     displayName: 'Authenticate to NuGet'

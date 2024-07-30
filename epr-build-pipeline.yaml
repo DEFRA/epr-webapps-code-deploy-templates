@@ -43,6 +43,9 @@ parameters:
 - name: sonarqubeInstance
   type: string
   default: 'SonarQube'
+- name: dotnetVersion
+  type: string
+  default: 'dotnetVersion6'
 
 stages:
   - stage: ValidateAndBuild
@@ -58,7 +61,8 @@ stages:
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-              
+              dotnetVersion: ${{ parameters.dotnetVersion }}
+
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
         dependsOn: ''
