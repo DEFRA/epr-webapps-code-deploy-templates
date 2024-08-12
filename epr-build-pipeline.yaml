@@ -46,13 +46,16 @@ parameters:
 - name: dotnetVersion
   type: string
   default: 'dotnetVersion6'
+- name: runAutomationTests #will let us toggle automation tests on or off
+  type: boolean
+  default: true
 
-#resources:
-#  repositories:
-#    - repository: AutomationTesting
-#      name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
-#      type: git
-#      ref: automation-testing-sam
+resources:
+  repositories:
+    - repository: AutomationTesting
+      name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
+      type: git
+      ref: automation-testing-sam
 
 stages:
 
@@ -74,8 +77,8 @@ stages:
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
         dependsOn: ''
-        pool:
-          vmImage: ubuntu-latest
+        #pool:
+          #vmImage: ubuntu-latest
         variables: 
         - name: commonTemplatesRepoSubDir
           value: s/CommonTemplates
@@ -150,15 +153,15 @@ stages:
               registryName: ${{ parameters.acrRepositoryName }}
               serviceName: ${{ parameters.serviceName }}
               targetEnvironment: 'development'
-              
-#      - job: RunAutomationTest
-#        displayName: DEV4 Automation Testing
-#        dependsOn: DeployLatestMainDev4
-#        pool: DEFRA-COMMON-ubuntu2004-SSV3
-#        steps:
-#          - checkout: AutomationTesting
-#          - template: automation-testing.yaml@AutomationTesting
-      
+
+      - ${{ if eq(parameters.runAutomationTests, true) }}:
+        - job: RunAutomationTest
+          displayName: DEV4 Automation Testing
+          dependsOn: DeployLatestMainDev4
+          steps:
+            - checkout: AutomationTesting
+            - template: automation-testing.yaml@AutomationTesting
+
       - job: RunLatestSQLMigrationDev4
         displayName: Run latest SQL Migration for Dev4
         condition: eq('${{parameters.buildMigrationScript}}', true)
