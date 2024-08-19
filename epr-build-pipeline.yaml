@@ -48,7 +48,7 @@ parameters:
   default: 'dotnetVersion6'
 - name: runAutomationTests #will let us toggle automation tests on or off
   type: boolean
-  default: true
+  default: false
 
 resources:
   repositories:
