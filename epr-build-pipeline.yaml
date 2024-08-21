@@ -48,19 +48,20 @@ parameters:
   default: 'dotnetVersion6'
 - name: runAutomationTests #will let us toggle automation tests on or off
   type: boolean
-  default: false
+  default: true
 
 resources:
   repositories:
     - repository: AutomationTesting
       name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
       type: git
-      ref: automation-testing-sam
+      ref: automation-testing-build-pipeline
 
 stages:
 
   - stage: ValidateAndBuild
     jobs:
+          
       - job: RunTests
         displayName: Run Static Code Analysis and Tests
         steps:
@@ -153,7 +154,7 @@ stages:
               registryName: ${{ parameters.acrRepositoryName }}
               serviceName: ${{ parameters.serviceName }}
               targetEnvironment: 'development'
-
+      
       - ${{ if eq(parameters.runAutomationTests, true) }}:
         - job: RunAutomationTest
           displayName: DEV4 Automation Testing
@@ -161,6 +162,9 @@ stages:
           steps:
             - checkout: AutomationTesting
             - template: automation-testing.yaml@AutomationTesting
+              parameters:
+                env: 'dev4'
+
 
       - job: RunLatestSQLMigrationDev4
         displayName: Run latest SQL Migration for Dev4
