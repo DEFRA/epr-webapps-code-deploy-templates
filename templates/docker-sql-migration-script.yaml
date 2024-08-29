@@ -7,6 +7,9 @@ parameters:
   - name: projectFolder
     type: string
     default: ''
+  - name: DataFolder
+    type: string
+    default: ''
   - name: azureContainerRegistryName
     type: string
   - name: imageName
@@ -43,8 +46,8 @@ steps:
     inputs:
       repository: ${{parameters.imageName}}
       command: build
-      buildContext:  ${{parameters.solutionFolder}}/BackendAccountService.Data/Scripts/
-      dockerfile: ${{parameters.solutionFolder}}/BackendAccountService.Data/Scripts/Dockerfile
+      buildContext:  ${{parameters.solutionFolder}}/${{parameters.DataFolder}}/Scripts/
+      dockerfile: ${{parameters.solutionFolder}}/${{parameters.DataFolder}}/Scripts/Dockerfile
       tags: $(Build.BuildNumber)-database-migrations
 
   - task: AzureCLI@2

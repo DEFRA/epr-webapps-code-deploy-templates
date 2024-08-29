@@ -17,6 +17,7 @@ parameters:
   - name: dotnetVersion
     type: string
     
+  
 steps:
   - script: |
       dotnet --list-sdks
