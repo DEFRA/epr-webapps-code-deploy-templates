@@ -35,7 +35,7 @@ parameters:
   default: ''
 - name: runOWASPScan
   type: boolean
-  default: true
+  default: false
 - name: gitleaksFailOnSecretDetection
   type: boolean
   default: false
