@@ -12,6 +12,10 @@ parameters:
   type: string
 - name: targetEnvironment
   type: string
+- name: runAutomationTests #will let us toggle automation tests on or off
+  type: boolean
+  default: true
+
 
 jobs:
 - deployment: 'DeployAppCode'
@@ -50,3 +54,13 @@ jobs:
               azureSubscription: ${{ parameters.azureSubscription }}
               appName: ${{ parameters.serviceName }}
               imageName: ${{ parameters.acrName }}.azurecr.io/${{ parameters.registryName }}:${{ parameters.imageTag }}
+
+- ${{ if and(eq(parameters.runAutomationTests, true), eq(parameters.targetEnvironment, 'tst')) }}:
+  - job: RunAutomationTest
+    dependsOn: DeployAppCode
+    displayName: 'Run TST Automation Testing'
+    steps:
+      - checkout: AutomationTesting
+      - template: automation-testing-template.yml@AutomationTesting
+        parameters:
+          env: 'tst'

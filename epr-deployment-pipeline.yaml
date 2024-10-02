@@ -12,16 +12,10 @@ parameters:
   type: string
 - name: targetEnvironment
   type: string
-#- name: runAutomationTests #will let us toggle automation tests on or off
-#  type: boolean
-#  default: false
+- name: runAutomationTests #will let us toggle automation tests on or off
+  type: boolean
+  default: true
 
-#resources:
-#  repositories:
-#    - repository: AutomationTesting
-#      name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
-#      type: git
-#      ref: automation-testing-sam
 
 jobs:
 - deployment: 'DeployAppCode'
@@ -41,13 +35,12 @@ jobs:
 
 
 
-#- ${{ if eq(parameters.runAutomationTests, true) }}:
-#  - job: RunAutomationTest
-#    dependsOn: DeployAppCode
-#    condition: eq('${{ parameters.targetEnvironment }}', 'development')
-#    displayName: 'Run TST Automation Testing'
-#    steps:
-#      - checkout: AutomationTesting
-#      - template: automation-testing.yaml@AutomationTesting
-#        parameters:
-#          env: 'tst'
+- ${{ if and(eq(parameters.runAutomationTests, true), eq(parameters.targetEnvironment, 'development')) }}:
+  - job: RunAutomationTest
+    dependsOn: DeployAppCode
+    displayName: 'Run TST Automation Testing'
+    steps:
+      - checkout: AutomationTesting
+      - template: automation-testing-template.yml@AutomationTesting
+        parameters:
+          env: 'tst'
