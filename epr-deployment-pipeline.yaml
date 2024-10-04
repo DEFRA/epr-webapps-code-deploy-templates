@@ -35,7 +35,7 @@ jobs:
 
 
 
-- ${{ if and(eq(parameters.runAutomationTests, true), eq(parameters.targetEnvironment, 'development')) }}:
+- ${{ if and(eq(parameters.runAutomationTests, true), eq(parameters.targetEnvironment, 'tst')) }}:
   - job: RunAutomationTest
     dependsOn: DeployAppCode
     displayName: 'Run TST Automation Testing'
