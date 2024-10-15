@@ -80,6 +80,7 @@ steps:
       configtype: 'custom'
       configfile: '${{ parameters.configPath }}'
       redact: false
+      version: 8.18.4
       verbose: true
       taskfail: ${{ parameters.failOnSecretDetection }}
     displayName: Gitleaks Scan
