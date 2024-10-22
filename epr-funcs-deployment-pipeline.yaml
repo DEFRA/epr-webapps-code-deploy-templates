@@ -61,6 +61,6 @@ jobs:
     displayName: 'Run TST Automation Testing'
     steps:
       - checkout: AutomationTesting
-      - template: automation-testing-template.yml@AutomationTesting
+      - template: pipelines/automation-testing-template.yml@AutomationTesting
         parameters:
           env: 'tst'
