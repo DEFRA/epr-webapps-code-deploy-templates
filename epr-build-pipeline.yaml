@@ -57,7 +57,7 @@ resources:
     - repository: AutomationTesting
       name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
       type: git
-      ref: main
+      ref: fix-build-pipeline
 
 stages:
   - stage: ValidateAndBuild
