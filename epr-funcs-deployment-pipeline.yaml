@@ -49,10 +49,10 @@ jobs:
                   az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
 
           - task: AzureFunctionAppContainer@1
-            displayName: 'Deploy code to Function app: ${{ parameters.serviceName }}'
+            displayName: 'Deploy code to Function app: ${{ upper(parameters.serviceName) }}'
             inputs:
               azureSubscription: ${{ parameters.azureSubscription }}
-              appName: ${{ parameters.serviceName }}
+              appName: ${{ upper(parameters.serviceName) }}
               imageName: ${{ parameters.acrName }}.azurecr.io/${{ parameters.registryName }}:${{ parameters.imageTag }}
 
 - ${{ if and(eq(parameters.runAutomationTests, true), eq(parameters.targetEnvironment, 'tst')) }}:

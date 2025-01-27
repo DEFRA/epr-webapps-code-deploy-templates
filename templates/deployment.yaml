@@ -16,7 +16,7 @@ parameters:
 steps:
   - bash: |
       echo "Deploying dockerImage --> "${{ parameters.registryName }}:${{ parameters.imageTag }} "to env --> "${{ parameters.targetEnvironment }}
-      echo "Deploying dockerImage to "${{ parameters.serviceName }}
+      echo "Deploying dockerImage to "${{ upper(parameters.serviceName) }}
     displayName: 'Show Environment Details'
 
   - bash: |
@@ -43,18 +43,18 @@ steps:
           az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
 
   - task: AzureRmWebAppDeployment@4
-    displayName: 'Deploy code to --> ${{ parameters.serviceName }}'
+    displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }}'
     inputs:
       ConnectionType: 'AzureRM'
       azureSubscription: ${{ parameters.azureSubscription }}
       appType: 'webAppContainer'
-      WebAppName: ${{ parameters.serviceName }}
+      WebAppName: ${{ upper(parameters.serviceName) }}
       DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
       DockerRepository: ${{ parameters.registryName }}
       DockerImageTag: ${{ parameters.imageTag }}
 
   - task: AzureCLI@2
-    displayName: 'Restart Service - ${{ parameters.serviceName }}'
+    displayName: 'Restart Service - ${{ upper(parameters.serviceName) }}'
     inputs:
       azureSubscription: ${{ parameters.azureSubscription }}
       scriptType: 'pscore'

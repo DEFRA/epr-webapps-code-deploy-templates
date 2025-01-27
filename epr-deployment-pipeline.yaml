@@ -30,7 +30,7 @@ jobs:
               azureSubscription: ${{ parameters.azureSubscription }}
               acrName: ${{ parameters.acrName }}
               registryName: ${{ parameters.registryName }}
-              serviceName: ${{ parameters.serviceName }}
+              serviceName: ${{ upper(parameters.serviceName) }}
               targetEnvironment: ${{ parameters.targetEnvironment }}
 
 
