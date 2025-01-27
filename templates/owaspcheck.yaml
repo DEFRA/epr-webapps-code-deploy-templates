@@ -28,6 +28,30 @@ steps:
       key: 'dependency-check | "$(Agent.OS)"'
       path: $(DEPENDENCY_CHECK_DATA)
 
+  - task: PythonScript@0
+    displayName: 'Replace Cyrillic Characters in .csproj File'
+    inputs:
+      scriptSource: 'inline'
+      script: |
+        import os
+        def replace_cyrillic_with_latin(file_path):
+            cyrillic_to_latin = {'о': 'o', 'е': 'e', 'х': 'x'}
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+            for cyrillic_char, latin_char in cyrillic_to_latin.items():
+                content = content.replace(cyrillic_char, latin_char)
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(content)
+
+        def file_exists(file_path):
+          return os.path.isfile(file_path)
+
+
+        file_path = '$(Build.SourcesDirectory)/src/EPR.Payment.Facade.Common.UnitTests/EPR.Payment.Facade.Common.UnitTests.csproj'
+        if file_exists(file_path): 
+          replace_cyrillic_with_latin(file_path)
+          print(f'Replaced Cyrillic characters with Latin characters in {file_path}.')
+            
   - task: AzureKeyVault@2
     displayName: 'Get OWASP NVD Key'
     inputs:
@@ -41,7 +65,7 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdApiKey $(OwaspNVDKey)'
+      additionalArguments: '--nvdApiKey $(OwaspNVDKey) --log $(Build.ArtifactStagingDirectory)/dependency-check.log'
 
   - task: DownloadBuildArtifacts@1
     displayName: 'Download Pipeline Artifact'

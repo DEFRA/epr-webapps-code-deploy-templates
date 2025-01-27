@@ -21,13 +21,13 @@ steps:
   - task: AzurePowerShell@5
     displayName: 'Get SQL Credentials from KV'
     inputs:
-      azureSubscription: $(azureSubscription)
+      azureSubscription: ${{ parameters.azureSubscription }}
       ScriptType: 'InlineScript'
       Inline: |
         $sqladminu = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'RWDSql-AdminLogin' -AsPlainText
         $sqladminp = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'RWDSql-AdminPassword' -AsPlainText
 
-        if ( "$(azureSubscription)" -like "*EPL*") {
+        if ( "${{ parameters.azureSubscription }}" -like "*EPL*") {
           $sqladminu = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'EPLSql-AdminLogin' -AsPlainText
           $sqladminp = Get-AzKeyVaultSecret -VaultName $(kvName) -Name 'EPLSql-AdminPassword' -AsPlainText
         }
@@ -62,7 +62,7 @@ steps:
   - task: AzureCLI@2
     displayName: 'Pulling correct image'
     inputs:
-      azureSubscription: $(azureSubscription)
+      azureSubscription: ${{ parameters.azureSubscription }}
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
@@ -73,7 +73,7 @@ steps:
   - task: AzureCLI@2
     displayName: 'Docker run for migrations'
     inputs:
-      azureSubscription: $(azureSubscription)
+      azureSubscription: ${{ parameters.azureSubscription }}
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |

@@ -72,7 +72,7 @@ steps:
   - task: SonarQubePublish@6
     retryCountOnTaskFailure: 5
     inputs:
-      pollingTimeoutSec: '200'
+      pollingTimeoutSec: '300'
 
   - task: AzureKeyVault@2
     displayName: 'Obtain SonarQube Token from Keyvault'
