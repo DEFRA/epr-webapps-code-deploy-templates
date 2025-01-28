@@ -44,7 +44,7 @@ parameters:
   default: ''
 - name: sonarqubeInstance
   type: string
-  default: 'SonarQube'
+  default: SonarQube
 - name: dotnetVersion
   type: string
   default: 'dotnetVersion6'
@@ -57,7 +57,7 @@ resources:
     - repository: AutomationTesting
       name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
       type: git
-      ref: fix-build-pipeline
+      ref: develop-template-fix
 
 stages:
   - stage: ValidateAndBuild
@@ -165,6 +165,7 @@ stages:
               parameters:
                 env: 'dev4'
                 tags: '@sit'
+
       
       - job: RunLatestSQLMigrationDev4
         displayName: Run latest SQL Migration for Dev4
