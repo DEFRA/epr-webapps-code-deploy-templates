@@ -30,8 +30,9 @@ steps:
       fi
       
   - task: SonarQubePrepare@6
+    displayName: 'SonarQube Upgraded Prepare'
     inputs:
-      SonarQube: '${{ parameters.sonarqubeInstance }}'
+      SonarQube: 'SonarQubeLatest'
       scannerMode: 'MSBuild'
       projectKey: '${{parameters.sonarQubeProjectKey}}'
       projectName: '${{parameters.sonarQubeProjectName}}'
@@ -66,12 +67,64 @@ steps:
       publishTestResults: true
 
   - task: SonarQubeAnalyze@6
+    displayName: 'SonarQube Upgraded Analyse'
     inputs:
       jdkversion: 'JAVA_HOME_17_X64'
 
   - task: SonarQubePublish@6
+    displayName: 'SonarQube Upgraded Publish'
     retryCountOnTaskFailure: 5
     inputs:
+      SonarQube: 'SonarQubeLatest'
+      pollingTimeoutSec: '300'
+
+  - task: SonarQubePrepare@6
+    displayName: 'SonarQube Old Prepare'
+    inputs:
+      SonarQube: 'SonarQube'
+      scannerMode: 'MSBuild'
+      projectKey: '${{parameters.sonarQubeProjectKey}}'
+      projectName: '${{parameters.sonarQubeProjectName}}'
+      extraProperties: sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+  - task: NuGetAuthenticate@1
+    displayName: 'Authenticate to NuGet'
+    condition: eq(${{parameters.runNugetTasks}}, true)
+
+  - task: DotNetCoreCLI@2
+    displayName: 'NuGet Restore'
+    condition: eq(${{parameters.runNugetTasks}}, true)
+    inputs:
+      command: 'restore'
+      projects: '**/*.sln'
+      feedsToUse: 'config'
+      nugetConfigPath: '${{parameters.solutionFolder}}/NuGet.Config'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Build'
+    inputs:
+      command: build
+      projects: '**/*.csproj'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Unit Tests'
+    condition: eq(${{parameters.runTests}}, true)
+    inputs:
+      command: test
+      projects: '**/*[Uu]nit[Tt]ests/*.csproj'
+      arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
+      publishTestResults: true
+
+  - task: SonarQubeAnalyze@6
+    displayName: 'SonarQube Old Analyse'
+    inputs:
+      jdkversion: 'JAVA_HOME_17_X64'
+
+  - task: SonarQubePublish@6
+    displayName: 'SonarQube Old Publish'
+    retryCountOnTaskFailure: 5
+    inputs:
+      SonarQube: 'SonarQube'
       pollingTimeoutSec: '300'
 
   - task: AzureKeyVault@2
