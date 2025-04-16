@@ -60,22 +60,18 @@ resources:
       ref: develop-template-fix
 
 stages:
+  - template: templates/analyse-and-test.yaml
+    parameters:
+      solutionFolder: ${{ parameters.solutionFolder }}
+      sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
+      sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
+      runTests: ${{ parameters.runTests }}
+      runNugetTasks: ${{ parameters.runNugetTasks }}
+      sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
+      dotnetVersion: ${{ parameters.dotnetVersion }}
+
   - stage: ValidateAndBuild
     jobs:
-
-      - job: RunTests
-        displayName: Run Static Code Analysis and Tests
-        steps:
-          - template: templates/analyse-and-test.yaml
-            parameters:
-              solutionFolder: ${{ parameters.solutionFolder }}
-              sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
-              sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
-              runTests: ${{ parameters.runTests }}
-              runNugetTasks: ${{ parameters.runNugetTasks }}
-              sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-              dotnetVersion: ${{ parameters.dotnetVersion }}
-
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
         dependsOn: ''
@@ -104,7 +100,6 @@ stages:
       - ${{ if eq(parameters.runOWASPScan, true) }}:
         - job: RunOWASPTests
           displayName: Run OWASP Dependency checks
-          dependsOn: RunTests
           steps:
             - template: templates/owaspcheck.yaml
               parameters:
@@ -114,7 +109,6 @@ stages:
 
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
-        dependsOn: RunTests
         steps:
           - template: templates/docker.yaml
             parameters:
