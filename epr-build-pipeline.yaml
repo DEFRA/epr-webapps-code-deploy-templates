@@ -174,9 +174,11 @@ stages:
               repositoryName: ${{ parameters.acrRepositoryName }}
               branchName: 'main-latest'
 
-      - job: SendBuildMetrics
-        displayName: Send build metrics
-        condition: eq('${{parameters.buildMigrationScript}}', true)
+
+  - stage: Send Results
+    jobs:
+      - job: 
+        displayName: test results
         steps:
         - task: Bash@3
           displayName: 'test script'
