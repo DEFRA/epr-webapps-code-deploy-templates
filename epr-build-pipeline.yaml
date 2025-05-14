@@ -173,3 +173,13 @@ stages:
               azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
               repositoryName: ${{ parameters.acrRepositoryName }}
               branchName: 'main-latest'
+
+      - job: SendBuildMetrics
+        displayName: Send build metrics
+        condition: eq('${{parameters.buildMigrationScript}}', true)
+        steps:
+        - task: Bash@3
+           displayName: 'test script'
+           inputs:
+              targetType: 'inline'
+              script: |
