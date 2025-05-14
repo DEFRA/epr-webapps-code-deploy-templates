@@ -175,7 +175,7 @@ stages:
               branchName: 'main-latest'
 
 
-  - stage: Send Results
+  - stage: SendResultsTest
     jobs:
       - job: 
         displayName: test results
