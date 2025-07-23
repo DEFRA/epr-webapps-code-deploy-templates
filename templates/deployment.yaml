@@ -4,6 +4,8 @@ parameters:
   default: 'latest'
 - name: azureSubscription
   type: string
+- name: azureResourceGroup
+  type: string
 - name: acrName
   type: string
 - name: registryName
@@ -52,6 +54,18 @@ steps:
       DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
       DockerRepository: ${{ parameters.registryName }}
       DockerImageTag: ${{ parameters.imageTag }}
+  
+  - task: AzureCLI@2
+    displayName: "Update config setting"
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        az webapp config appsettings set \
+          --name ${{ upper(parameters.serviceName) }} \
+          --resource-group ${{ parameters.azureResourceGroup }} \
+          --settings ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
 
   - task: AzureCLI@2
     displayName: 'Restart Service - ${{ upper(parameters.serviceName) }}'
