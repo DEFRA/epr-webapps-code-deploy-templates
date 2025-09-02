@@ -73,14 +73,14 @@ steps:
       }
     displayName: Update gitleaksignore file
 
-  - task: Gitleaks@2
+  - task: Gitleaks@3
     inputs:
       scanmode: ${{ parameters.scanMode }}
       scanlocation: '${{ parameters.scanLocation }}'
       configtype: 'custom'
       configfile: '${{ parameters.configPath }}'
       redact: false
-      version: 8.18.4
+      # version: 8.18.4
       verbose: true
       taskfail: ${{ parameters.failOnSecretDetection }}
     displayName: Gitleaks Scan
