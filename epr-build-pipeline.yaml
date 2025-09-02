@@ -124,18 +124,6 @@ stages:
                 solutionFolder: ${{ parameters.solutionFolder }}
                 testProjectFolder: ${{ parameters.testProjectFolder }}
                 componentDirectory: ${{ parameters.componentDirectory }}
-
-      
-      - ${{ if eq(parameters.runAutomationTests, true) }}:
-        - job: RunAutomationTest
-          displayName: DEV4 Automation Testing
-          dependsOn: ''
-          steps:
-            - checkout: AutomationTesting
-            - template: pipelines/automation-testing-template.yml@AutomationTesting
-              parameters:
-                env: 'dev4'
-                tags: '@sit'     
       
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
@@ -143,7 +131,6 @@ stages:
           - RunDotnetSDKScript
           - AnalyseAndTest
           - RunGitleaksSecretScan
-          - RunAutomationTest
         steps:
           - template: templates/docker.yaml
             parameters:
@@ -172,8 +159,20 @@ stages:
   - stage: DeployToDev4
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
+
+      - ${{ if eq(parameters.runAutomationTests, true) }}:
+        - job: RunAutomationTest
+          displayName: DEV4 Automation Testing
+          steps:
+            - checkout: AutomationTesting
+            - template: pipelines/automation-testing-template.yml@AutomationTesting
+              parameters:
+                env: 'dev4'
+                tags: '@sit'
+
       - job: DeployLatestMainDev4
         displayName: Deploy Latest Main to Dev4
+        dependsOn: RunAutomationTest
         steps:
           - template: templates/deployment.yaml
             parameters:
@@ -183,6 +182,7 @@ stages:
               registryName: ${{ parameters.acrRepositoryName }}
               serviceName: ${{ parameters.serviceName }}
               targetEnvironment: 'development'
+
 
 
 
