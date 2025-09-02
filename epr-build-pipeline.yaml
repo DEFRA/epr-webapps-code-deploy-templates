@@ -60,18 +60,35 @@ resources:
       ref: develop-template-fix
 
 stages:
-  - template: templates/analyse-and-test.yaml
-    parameters:
-      solutionFolder: ${{ parameters.solutionFolder }}
-      sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
-      sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
-      runTests: ${{ parameters.runTests }}
-      runNugetTasks: ${{ parameters.runNugetTasks }}
-      sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-      dotnetVersion: ${{ parameters.dotnetVersion }}
 
-  - stage: ValidateAndBuild
+
+  - stage: ValidateAndBuild 
     jobs:
+
+      - job: RunDotnetSDKScript
+        displayName: Run Dotnet SDK Script
+        steps:
+          - template: templates/sdk-script.yaml
+            parameters:
+              solutionFolder: ${{ parameters.solutionFolder }}
+              dotnetVersion: ${{ parameters.testProjectFolder }}
+
+      - job: AnalyseAndTest
+        displayName: Run Unit Tests and SonarQube steps
+        dependsOn: ''
+        steps:
+          - template: templates/analyse-and-test.yaml
+            parameters:
+              solutionFolder: ${{ parameters.solutionFolder }}
+              sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
+              sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
+              runTests: ${{ parameters.runTests }}
+              runNugetTasks: ${{ parameters.runNugetTasks }}
+              sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
+              # dotnetVersion: ${{ parameters.dotnetVersion }}
+
+      
+
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
         dependsOn: ''
@@ -100,6 +117,7 @@ stages:
       - ${{ if eq(parameters.runOWASPScan, true) }}:
         - job: RunOWASPTests
           displayName: Run OWASP Dependency checks
+          dependsOn: ''
           steps:
             - template: templates/owaspcheck.yaml
               parameters:
@@ -107,8 +125,25 @@ stages:
                 testProjectFolder: ${{ parameters.testProjectFolder }}
                 componentDirectory: ${{ parameters.componentDirectory }}
 
+      
+      - ${{ if eq(parameters.runAutomationTests, true) }}:
+        - job: RunAutomationTest
+          displayName: DEV4 Automation Testing
+          dependsOn: ''
+          steps:
+            - checkout: AutomationTesting
+            - template: pipelines/automation-testing-template.yml@AutomationTesting
+              parameters:
+                env: 'dev4'
+                tags: '@sit'     
+      
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
+        dependsOn:
+          - RunDotnetSDKScript
+          - AnalyseAndTest
+          - RunGitleaksSecretScan
+          - RunAutomationTest
         steps:
           - template: templates/docker.yaml
             parameters:
@@ -149,16 +184,7 @@ stages:
               serviceName: ${{ parameters.serviceName }}
               targetEnvironment: 'development'
 
-      - ${{ if eq(parameters.runAutomationTests, true) }}:
-        - job: RunAutomationTest
-          displayName: DEV4 Automation Testing
-          dependsOn: DeployLatestMainDev4
-          steps:
-            - checkout: AutomationTesting
-            - template: pipelines/automation-testing-template.yml@AutomationTesting
-              parameters:
-                env: 'dev4'
-                tags: '@sit'
+
 
       
       - job: RunLatestSQLMigrationDev4
