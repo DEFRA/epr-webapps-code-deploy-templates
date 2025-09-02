@@ -1,0 +1,18 @@
+parameters:
+  - name: solutionFolder
+    type: string
+    default: ''
+  - name: dotnetVersion
+    type: string
+
+
+steps:
+  - script: |
+      dotnet --list-sdks
+      if [ "${{ parameters.dotnetVersion }}" == "dotnetVersion8" ]; then
+        echo '{"sdk":{"version":"8.0.303","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+        cat ${{ parameters.solutionFolder }}/global.json
+      else
+        echo '{"sdk":{"version":"6.0.424","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+        cat ${{ parameters.solutionFolder }}/global.json
+      fi
