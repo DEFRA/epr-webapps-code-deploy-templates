@@ -395,4 +395,3 @@ regexes = [
     '''(?i)SHARED_ACCESS_KEY''',
     '''(?i)b77a5c561934e089'''
 ]
-
