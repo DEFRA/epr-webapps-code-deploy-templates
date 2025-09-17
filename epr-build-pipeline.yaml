@@ -81,8 +81,6 @@ stages:
               sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
-              sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-              # dotnetVersion: ${{ parameters.dotnetVersion }}
 
       
 
