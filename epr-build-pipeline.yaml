@@ -42,9 +42,6 @@ parameters:
 - name: serviceName
   type: string
   default: ''
-- name: sonarqubeInstance
-  type: string
-  default: SonarQube
 - name: dotnetVersion
   type: string
   default: 'dotnetVersion6'
