@@ -48,6 +48,8 @@ parameters:
 - name: runAutomationTests #will let us toggle automation tests on or off
   type: boolean
   default: true
+- name: sonarqubeInstance
+  type: string
 
 resources:
   repositories:
@@ -81,6 +83,7 @@ stages:
               sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
+              sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
 
       
 
