@@ -50,6 +50,7 @@ parameters:
   default: true
 - name: sonarqubeInstance
   type: string
+  default: SonarQube
 
 resources:
   repositories:
