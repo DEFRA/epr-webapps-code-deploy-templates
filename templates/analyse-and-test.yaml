@@ -20,13 +20,14 @@ parameters:
     default: true
   - name: sonarqubeInstance
     type: string
-    default: SonarQubeLatest
+    default: SonarQube
+
 
 steps:
   - task: SonarQubePrepare@6
     displayName: 'SonarQube Upgraded Prepare'
     inputs:
-      SonarQube: 'SonarQubeLatest'
+      SonarQube: '${{parameters.sonarqubeInstance}}'
       scannerMode: 'MSBuild'
       projectKey: '${{parameters.sonarQubeProjectKey}}'
       projectName: '${{parameters.sonarQubeProjectName}}'
@@ -80,7 +81,7 @@ steps:
     displayName: 'SonarQube Upgraded Publish'
     retryCountOnTaskFailure: 5
     inputs:
-      SonarQube: 'SonarQubeLatest'
+      SonarQube: '${{parameters.sonarqubeInstance}}'
       pollingTimeoutSec: '300'
 
   - task: AzureKeyVault@2
