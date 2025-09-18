@@ -42,15 +42,15 @@ parameters:
 - name: serviceName
   type: string
   default: ''
-- name: sonarqubeInstance
-  type: string
-  default: SonarQube
 - name: dotnetVersion
   type: string
   default: 'dotnetVersion6'
 - name: runAutomationTests #will let us toggle automation tests on or off
   type: boolean
   default: true
+- name: sonarqubeInstance
+  type: string
+  default: SonarQube
 
 resources:
   repositories:
@@ -85,7 +85,6 @@ stages:
               runTests: ${{ parameters.runTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-              # dotnetVersion: ${{ parameters.dotnetVersion }}
 
       
 
