@@ -111,7 +111,14 @@ steps:
           $qualifier = '&branch='+$escapedBranchName
         }
         Switch ("${{parameters.sonarqubeInstance}}") {
-          "SonarQube" { $instanceUrlPart = "vss-sonarqube.azure.defra.cloud" }
+          "SonarQube" { 
+            $sonarQubeApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$(EPRADO-SonarQubeToken):"))
+            $headers = @{
+              "Authorization" = "Basic $sonarQubeApiToken"
+              "Accept" = "application/json"
+            };
+            $instanceUrlPart = "vss-sonarqube.azure.defra.cloud" 
+          }
           "SonarQubeLatest" {
             $sonarQubeApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$(EPRADO-SonarQubeToken):"))
             $headers = @{
