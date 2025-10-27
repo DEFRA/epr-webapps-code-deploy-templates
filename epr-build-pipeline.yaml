@@ -51,6 +51,12 @@ parameters:
 - name: sonarqubeInstance
   type: string
   default: SonarQube
+- name: additionalDeployments
+  type: boolean
+  default: false
+- name: RegulatorsServiceName
+  type: string
+  default: ''
 
 resources:
   repositories:
@@ -182,13 +188,24 @@ stages:
               serviceName: ${{ parameters.serviceName }}
               targetEnvironment: 'development'
 
-
-
-
+      - job: DeployToDev4Regulators
+        displayName: Deploy Latest Main to Dev4 Regulators App
+        condition: eq('${{parameters.additionalDeployments}}', true)
+        dependsOn: RunAutomationTest
+        steps:
+          - template: templates/deployment.yaml
+            parameters:
+              imageTag: 'main-latest'
+              azureSubscription: ${{ parameters.azureSubscription }}
+              acrName: ${{ parameters.acrAzureContainerRegistryName }}
+              registryName: ${{ parameters.acrRepositoryName }}
+              serviceName: ${{ parameters.RegulatorsServiceName }}
+              targetEnvironment: 'development'
       
       - job: RunLatestSQLMigrationDev4
         displayName: Run latest SQL Migration for Dev4
         condition: eq('${{parameters.buildMigrationScript}}', true)
+        dependsOn: RunAutomationTest
         steps:
           - template: templates/docker-run-sql-migration.yaml
             parameters:
