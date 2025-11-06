@@ -74,6 +74,8 @@ stages:
       - job: RunDotnetSDKScript
         displayName: Run Dotnet SDK Script
         steps:
+          - checkout: self          # (optional) add here too if that job needs full history
+            fetchDepth: 0
           - template: templates/sdk-script.yaml
             parameters:
               solutionFolder: ${{ parameters.solutionFolder }}
@@ -83,6 +85,9 @@ stages:
         displayName: Run Unit Tests and SonarQube steps
         dependsOn: ''
         steps:
+          - checkout: self          # Force full history for SonarQube analysis
+            fetchDepth: 0
+            clean: true             # optional
           - template: templates/analyse-and-test.yaml
             parameters:
               solutionFolder: ${{ parameters.solutionFolder }}
