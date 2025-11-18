@@ -38,7 +38,7 @@ parameters:
   default: true
 - name: gitleaksFailOnSecretDetection
   type: boolean
-  default: false
+  default: true
 - name: serviceName
   type: string
   default: ''

@@ -73,6 +73,15 @@ steps:
       }
     displayName: Update gitleaksignore file
 
+  - pwsh: |
+      [bool]$failOnSecretDetection = ('$(Build.Repository.Provider)' -ne 'TfsGit') 
+      Write-Host "failOnSecretDetection=$failOnSecretDetection"
+      Write-Host "##vso[task.setvariable variable=failOnSecretDetection]$failOnSecretDetection"
+
+
+      
+    displayName: set failOnSecretDetection
+
   - task: Gitleaks@3
     inputs:
       scanmode: ${{ parameters.scanMode }}
