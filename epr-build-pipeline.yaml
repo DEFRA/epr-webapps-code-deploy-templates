@@ -16,6 +16,9 @@ parameters:
 - name: runTests
   type: boolean
   default: true
+- name: runIntegrationTests
+  type: boolean
+  default: false
 - name: azureSubscription
   type: string
 - name: acrAzureContainerRegistryName
@@ -68,7 +71,7 @@ resources:
 stages:
 
 
-  - stage: ValidateAndBuild 
+  - stage: ValidateAndBuild
     jobs:
 
       - job: RunDotnetSDKScript
@@ -94,15 +97,16 @@ stages:
               sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
               sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
               runTests: ${{ parameters.runTests }}
+              runIntegrationTests: ${{ parameters.runIntegrationTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
 
-      
+
 
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
         dependsOn: ''
-        variables: 
+        variables:
         - name: commonTemplatesRepoSubDir
           value: s/CommonTemplates
         - name: commonTemplatesRepoRoot
@@ -134,7 +138,7 @@ stages:
                 solutionFolder: ${{ parameters.solutionFolder }}
                 testProjectFolder: ${{ parameters.testProjectFolder }}
                 componentDirectory: ${{ parameters.componentDirectory }}
-      
+
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
         dependsOn:
@@ -165,7 +169,7 @@ stages:
               azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
               repositoryName: ${{ parameters.acrRepositoryName }}
               branchName: ${{ parameters.branchName }}
-      
+
   - stage: DeployToDev4
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
@@ -206,7 +210,7 @@ stages:
               registryName: ${{ parameters.acrRepositoryName }}
               serviceName: ${{ parameters.RegulatorsServiceName }}
               targetEnvironment: 'development'
-      
+
       - job: RunLatestSQLMigrationDev4
         displayName: Run latest SQL Migration for Dev4
         condition: eq('${{parameters.buildMigrationScript}}', true)

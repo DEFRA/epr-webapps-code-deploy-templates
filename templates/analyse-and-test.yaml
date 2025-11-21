@@ -15,6 +15,9 @@ parameters:
   - name: runTests
     type: boolean
     default: true
+  - name: runIntegrationTests
+    type: boolean
+    default: false
   - name: runNugetTasks
     type: boolean
     default: true
@@ -72,6 +75,42 @@ steps:
       arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
       publishTestResults: true
 
+  - task: CmdLine@2
+    displayName: 'Run Docker Compose'
+    condition: eq(${{parameters.runIntegrationTests}}, true)
+    inputs:
+      script: |
+        if [ -f "compose.yml" ]; then
+          docker compose up -d
+          docker compose ps
+        else
+          echo "No compose.yml file found, skipping"
+        fi
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Integration Tests'
+    condition: eq(${{parameters.runIntegrationTests}}, true)
+    inputs:
+      command: test
+      ${{ if eq(parameters.testFolder, '') }}:
+        projects: |
+          **/*[Ii]ntegration[Tt]ests/*.csproj
+      ${{else}}:
+        projects:  |
+          ${{ parameters.testFolder}}/**/*.csproj
+      arguments: '--configuration $(buildConfiguration) --filter "Category=IntegrationTest"'
+
+  - task: CmdLine@2
+    displayName: 'Stop Docker Compose'
+    condition: eq(${{parameters.runIntegrationTests}}, true)
+    inputs:
+      script: |
+        if [ -f "compose.yml" ]; then
+          docker compose down -v
+        else
+          echo "No compose.yml file found, skipping"
+        fi
+
   - task: SonarQubeAnalyze@6
     displayName: 'SonarQube Upgraded Analyse'
     inputs:
@@ -111,13 +150,13 @@ steps:
           $qualifier = '&branch='+$escapedBranchName
         }
         Switch ("${{parameters.sonarqubeInstance}}") {
-          "SonarQube" { 
+          "SonarQube" {
             $sonarQubeApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$(EPRADO-SonarQubeToken):"))
             $headers = @{
               "Authorization" = "Basic $sonarQubeApiToken"
               "Accept" = "application/json"
             };
-            $instanceUrlPart = "vss-sonarqube.azure.defra.cloud" 
+            $instanceUrlPart = "vss-sonarqube.azure.defra.cloud"
           }
           "SonarQubeLatest" {
             $sonarQubeApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$(EPRADO-SonarQubeToken):"))
@@ -125,7 +164,7 @@ steps:
               "Authorization" = "Basic $sonarQubeApiToken"
               "Accept" = "application/json"
             };
-            $instanceUrlPart = "vss-sonarqube-upgrade.azure.defra.cloud" 
+            $instanceUrlPart = "vss-sonarqube-upgrade.azure.defra.cloud"
           }
           Default { Write-Host "parameters.sonarqubeInstance '${{parameters.sonarqubeInstance}}' was unexpected"; exit 1 }
         }
