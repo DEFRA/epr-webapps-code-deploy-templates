@@ -65,7 +65,8 @@ steps:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
       format: 'XML, HTML'
-      additionalArguments: '--nvdApiKey $(OwaspNVDKey) --log $(Build.ArtifactStagingDirectory)/dependency-check.log'
+      #additionalArguments: '--nvdApiKey $(OwaspNVDKey) --log $(Build.ArtifactStagingDirectory)/dependency-check.log'
+      additionalArguments: '--nvdDatafeed https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-{0}.json.gz --log $(Build.ArtifactStagingDirectory)/dependency-check.log'
 
   - task: DownloadBuildArtifacts@1
     displayName: 'Download Pipeline Artifact'
