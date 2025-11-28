@@ -42,40 +42,108 @@ steps:
           az acr login --name ${{ parameters.acrName }}
           az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
 
-  - task: AzureRmWebAppDeployment@4
-    displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }}'
-    inputs:
-      ConnectionType: 'AzureRM'
-      azureSubscription: ${{ parameters.azureSubscription }}
-      appType: 'webAppContainer'
-      WebAppName: ${{ upper(parameters.serviceName) }}
-      DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
-      DockerRepository: ${{ parameters.registryName }}
-      DockerImageTag: ${{ parameters.imageTag }}
-
   - task: AzureCLI@2
-    displayName: 'Restart Service - ${{ upper(parameters.serviceName) }}'
+    displayName: 'add deployment slot - ${{ upper(parameters.serviceName) }}'
     inputs:
       azureSubscription: ${{ parameters.azureSubscription }}
       scriptType: 'pscore'
       scriptLocation: 'inlineScript'
       inlineScript: |
         Set-StrictMode -Version 3.0
-
         $serviceName = "${{ parameters.serviceName }}".ToUpper()
 
-        if ($serviceName -match "rwdwebwa") {
-          Write-Host "Restarting WA $serviceName"
-          $ids = az webapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
-          az webapp restart --ids $ids
-        } elseif ($serviceName -match "rwdwebfa") {
-          Write-Host "Restarting FA $serviceName"
-          $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
-          az functionapp restart --ids $ids
-        } else {
-          Write-Error "Unknown Service Type"
-          exit 1
-        }
+          if ($serviceName -match "rwdwebwa") {
+            Write-Host "Restarting WA $serviceName"
+            az webapp deployment slot create `
+              --name "$serviceName" `
+              --resource-group 'DEVRWDWEBRG1401' `
+              --slot 'staging' `
+              --configuration-source "$serviceName" `
+              --container-image-name ${{ parameters.registryName }}:${{ parameters.imageTag }} `
+              --container-registry-url "${{ parameters.acrName }}.azurecr.io" `
+              --container-registry-user devrwdinfac1401 `
+              --container-registry-password $(DockerPassword)
+
+          } elseif ($serviceName -match "rwdwebfa") {
+            Write-Host "Restarting FA $serviceName"
+            $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
+              
+          } else {
+            Write-Error "Unknown Service Type"
+            exit 1
+          } 
+
+  # - task: AzureRmWebAppDeployment@4
+  #   displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }}'
+  #   inputs:
+  #     ConnectionType: 'AzureRM'
+  #     azureSubscription: ${{ parameters.azureSubscription }}
+  #     appType: 'webAppContainer'
+  #     WebAppName: ${{ upper(parameters.serviceName) }}
+  #     DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
+  #     DockerRepository: ${{ parameters.registryName }}
+  #     DockerImageTag: ${{ parameters.imageTag }} 
+
+    - task: AzureCLI@2
+      displayName: 'swap deployment slots - ${{ upper(parameters.serviceName) }}'
+      inputs:
+        azureSubscription: ${{ parameters.azureSubscription }}
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          Set-StrictMode -Version 3.0 
+          $serviceName = "${{ parameters.serviceName }}".ToUpper()
+
+          if ($serviceName -match "rwdwebwa") {
+            Write-Host "Swapping slots on WA $serviceName"
+            az webapp deployment slot swap `
+              --name "$serviceName" `
+              --resource-group 'DEVRWDWEBRG1401' `
+              --slot 'staging' `
+              --target-slot production
+
+          } elseif ($serviceName -match "rwdwebfa") {
+            Write-Host "Restarting FA $serviceName"
+            
+          } else {
+            Write-Error "Unknown Service Type"
+            exit 1
+          }       
+
+  # - task: AzureRmWebAppDeployment@4
+  #   displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }}'
+  #   inputs:
+  #     ConnectionType: 'AzureRM'
+  #     azureSubscription: ${{ parameters.azureSubscription }}
+  #     appType: 'webAppContainer'
+  #     WebAppName: ${{ upper(parameters.serviceName) }}
+  #     DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
+  #     DockerRepository: ${{ parameters.registryName }}
+  #     DockerImageTag: ${{ parameters.imageTag }}
+
+  # - task: AzureCLI@2
+  #   displayName: 'Restart Service - ${{ upper(parameters.serviceName) }}'
+  #   inputs:
+  #     azureSubscription: ${{ parameters.azureSubscription }}
+  #     scriptType: 'pscore'
+  #     scriptLocation: 'inlineScript'
+  #     inlineScript: |
+  #       Set-StrictMode -Version 3.0
+
+  #       $serviceName = "${{ parameters.serviceName }}".ToUpper()
+
+  #       if ($serviceName -match "rwdwebwa") {
+  #         Write-Host "Restarting WA $serviceName"
+  #         $ids = az webapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
+  #         az webapp restart --ids $ids
+  #       } elseif ($serviceName -match "rwdwebfa") {
+  #         Write-Host "Restarting FA $serviceName"
+  #         $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
+  #         az functionapp restart --ids $ids
+  #       } else {
+  #         Write-Error "Unknown Service Type"
+  #         exit 1
+  #       }
 
   - task: AzureKeyVault@2
     condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
