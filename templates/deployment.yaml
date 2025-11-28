@@ -84,31 +84,31 @@ steps:
   #     DockerRepository: ${{ parameters.registryName }}
   #     DockerImageTag: ${{ parameters.imageTag }} 
 
-    - task: AzureCLI@2
-      displayName: 'swap deployment slots - ${{ upper(parameters.serviceName) }}'
-      inputs:
-        azureSubscription: ${{ parameters.azureSubscription }}
-        scriptType: 'pscore'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          Set-StrictMode -Version 3.0 
-          $serviceName = "${{ parameters.serviceName }}".ToUpper()
+  - task: AzureCLI@2
+    displayName: 'swap deployment slots - ${{ upper(parameters.serviceName) }}'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        Set-StrictMode -Version 3.0 
+        $serviceName = "${{ parameters.serviceName }}".ToUpper()
 
-          if ($serviceName -match "rwdwebwa") {
-            Write-Host "Swapping slots on WA $serviceName"
-            az webapp deployment slot swap `
-              --name "$serviceName" `
-              --resource-group 'DEVRWDWEBRG1401' `
-              --slot 'staging' `
-              --target-slot production
+        if ($serviceName -match "rwdwebwa") {
+          Write-Host "Swapping slots on WA $serviceName"
+          az webapp deployment slot swap `
+            --name "$serviceName" `
+            --resource-group 'DEVRWDWEBRG1401' `
+            --slot 'staging' `
+            --target-slot production
 
-          } elseif ($serviceName -match "rwdwebfa") {
-            Write-Host "Restarting FA $serviceName"
-            
-          } else {
-            Write-Error "Unknown Service Type"
-            exit 1
-          }       
+        } elseif ($serviceName -match "rwdwebfa") {
+          Write-Host "Restarting FA $serviceName"
+          
+        } else {
+          Write-Error "Unknown Service Type"
+          exit 1
+        }       
 
   # - task: AzureRmWebAppDeployment@4
   #   displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }}'
