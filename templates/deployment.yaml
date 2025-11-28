@@ -44,32 +44,32 @@ steps:
           az acr login --name ${{ parameters.acrName }}
           az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
 
-  - task: AzureCLI@2
-    displayName: 'add deployment slot - ${{ upper(parameters.serviceName) }}'
-    inputs:
-      azureSubscription: ${{ parameters.azureSubscription }}
-      scriptType: 'pscore'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        Set-StrictMode -Version 3.0
-        $serviceName = "${{ parameters.serviceName }}".ToUpper()
+  # - task: AzureCLI@2
+  #   displayName: 'add deployment slot - ${{ upper(parameters.serviceName) }}'
+  #   inputs:
+  #     azureSubscription: ${{ parameters.azureSubscription }}
+  #     scriptType: 'pscore'
+  #     scriptLocation: 'inlineScript'
+  #     inlineScript: |
+  #       Set-StrictMode -Version 3.0
+  #       $serviceName = "${{ parameters.serviceName }}".ToUpper()
 
-          if ($serviceName -match "rwdwebwa") {
-            Write-Host "Add staging slot to WA $serviceName"
-            az webapp deployment slot create `
-              --name "$serviceName" `
-              --resource-group '${{ parameters.resourceGroupName }}' `
-              --slot 'staging' `
-              --configuration-source "$serviceName" 
+  #         if ($serviceName -match "rwdwebwa") {
+  #           Write-Host "Add staging slot to WA $serviceName"
+  #           az webapp deployment slot create `
+  #             --name "$serviceName" `
+  #             --resource-group '${{ parameters.resourceGroupName }}' `
+  #             --slot 'staging' `
+  #             --configuration-source "$serviceName" 
 
-          } elseif ($serviceName -match "rwdwebfa") {
-            Write-Host "Restarting FA $serviceName"
-            $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
+  #         } elseif ($serviceName -match "rwdwebfa") {
+  #           Write-Host "Restarting FA $serviceName"
+  #           $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
               
-          } else {
-            Write-Error "Unknown Service Type"
-            exit 1
-          } 
+  #         } else {
+  #           Write-Error "Unknown Service Type"
+  #           exit 1
+  #         } 
 
   - task: AzureRmWebAppDeployment@4
     displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }} staging slot'
@@ -82,8 +82,9 @@ steps:
       DockerRepository: ${{ parameters.registryName }}
       DockerImageTag: ${{ parameters.imageTag }} 
       deployToSlotOrAS: true
-      ResourceGroupName: ${{ parameters.resourceGroupName }}
-      SlotName: 'staging'
+      ResourceGroupName: ${{parameters.resourceGroupName}}
+      SlotName: staging
+
 
   - task: AzureCLI@2
     displayName: 'swap deployment slots - ${{ upper(parameters.serviceName) }}'
@@ -99,7 +100,7 @@ steps:
           Write-Host "Swapping slots on WA $serviceName"
           az webapp deployment slot swap `
             --name "$serviceName" `
-            --resource-group "${{ parameters.resourceGroupName }}" `
+            --resource-group 'DEVRWDWEBRG1401' `
             --slot 'staging' `
             --target-slot production
 
