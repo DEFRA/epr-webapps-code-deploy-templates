@@ -4,6 +4,8 @@ parameters:
   default: 'main-latest'
 - name: azureSubscription
   type: string
+- name: resourceGroupName
+  type: string
 - name: acrName
   type: string
 - name: registryName
@@ -32,6 +34,7 @@ jobs:
               registryName: ${{ parameters.registryName }}
               serviceName: ${{ upper(parameters.serviceName) }}
               targetEnvironment: ${{ parameters.targetEnvironment }}
+              resourceGroupName: ${{ parameters.resourceGroupName }}
 
 
 
