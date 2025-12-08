@@ -151,7 +151,7 @@ steps:
 
             az webapp deployment slot delete `
               --name "$serviceName" `
-              --resource-group '${{ parameters.resourceGroupName }}' `
+              --resource-group '$rg' `
               --slot 'staging' 
 
           } elseif ($serviceName -match "rwdwebfa") {
@@ -160,7 +160,7 @@ steps:
 
             az functionapp deployment slot delete `
               --name "$serviceName" `
-              --resource-group '${{ parameters.resourceGroupName }}' `
+              --resource-group '$rg' `
               --slot 'staging' 
           } else {
             Write-Error "Unknown Service Type"
