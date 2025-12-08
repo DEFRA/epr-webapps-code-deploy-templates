@@ -58,7 +58,7 @@ steps:
 
             az webapp deployment slot create `
               --name "$serviceName" `
-              --resource-group rg `
+              --resource-group $rg `
               --slot 'staging' `
               --configuration-source "$serviceName" `
               --container-image-name "${{ parameters.registryName}}:${{ parameters.imageTag }}" `
@@ -73,7 +73,7 @@ steps:
 
             az functionapp deployment slot create `
               --name "$serviceName" `
-              --resource-group rg `
+              --resource-group $rg `
               --slot 'staging' `
               --configuration-source "$serviceName" `
               --image "devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }}" `
@@ -116,7 +116,7 @@ steps:
 
           az webapp deployment slot swap `
             --name "$serviceName" `
-            --resource-group rg `
+            --resource-group $rg `
             --slot 'staging' `
             --target-slot production
 
@@ -126,7 +126,7 @@ steps:
 
           az functionapp deployment slot swap `
             --name "$serviceName" `
-            --resource-group rg `
+            --resource-group $rg `
             --slot 'staging' `
             --target-slot production
           
@@ -160,7 +160,7 @@ steps:
 
             az functionapp deployment slot delete `
               --name "$serviceName" `
-              --resource-group rg `
+              --resource-group $rg `
               --slot 'staging' 
           } else {
             Write-Error "Unknown Service Type"
