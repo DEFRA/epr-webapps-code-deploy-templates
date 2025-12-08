@@ -24,16 +24,16 @@ steps:
   - bash: |
       echo "##vso[task.setvariable variable=subscription]${{ parameters.azureSubscription }}"
     displayName: 'Set Variable'
+  
+  - task: AzureKeyVault@2
+    displayName: 'Obtain Docker Password'
+    inputs:
+      azureSubscription: 'AZD-RWD-DEV1'
+      KeyVaultName: 'DEVRWDINFKV1401'
+      SecretsFilter: 'DockerPassword'
+      RunAsPreJob: true
 
   - ${{ if ne(parameters.targetEnvironment, 'development') }}:
-    - task: AzureKeyVault@2
-      displayName: 'Obtain Docker Password'
-      inputs:
-        azureSubscription: 'AZD-RWD-DEV1'
-        KeyVaultName: 'DEVRWDINFKV1401'
-        SecretsFilter: 'DockerPassword'
-        RunAsPreJob: true
-    
     - task: AzureCLI@2
       displayName: 'Copy Image to ${{ parameters.targetEnvironment }}'
       inputs:
@@ -59,7 +59,14 @@ steps:
             az webapp deployment slot create `
               --name "$serviceName" `
               --resource-group '${{ parameters.resourceGroupName }}' `
-              --slot 'staging' 
+              --slot 'staging' `
+              --configuration-source "$serviceName" `
+              --container-image-name "${{ parameters.registryName}}:${{ parameters.imageTag }}"
+              --container-registry-password $(DockerPassword) `
+              --container-registry-url devrwdinfac1401.azurecr.io `
+              --container-registry-user devrwdinfac1401
+
+
           } elseif ($serviceName -match "rwdwebfa") {
             Write-Host "Restarting FA $serviceName"
             $ids = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].id'
@@ -69,19 +76,19 @@ steps:
             exit 1
           } 
 
-  - task: AzureRmWebAppDeployment@4
-    displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }} staging slot'
-    inputs:
-      ConnectionType: 'AzureRM'
-      azureSubscription: ${{ parameters.azureSubscription }}
-      appType: 'webAppContainer'
-      WebAppName: ${{ upper(parameters.serviceName) }}
-      DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
-      DockerRepository: ${{ parameters.registryName }}
-      DockerImageTag: ${{ parameters.imageTag }} 
-      deployToSlotOrAS: true
-      ResourceGroupName: ${{parameters.resourceGroupName}}
-      SlotName: staging
+  # - task: AzureRmWebAppDeployment@4
+  #   displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }} staging slot'
+  #   inputs:
+  #     ConnectionType: 'AzureRM'
+  #     azureSubscription: ${{ parameters.azureSubscription }}
+  #     appType: 'webAppContainer'
+  #     WebAppName: ${{ upper(parameters.serviceName) }}
+  #     DockerNamespace: '${{ parameters.acrName }}.azurecr.io'
+  #     DockerRepository: ${{ parameters.registryName }}
+  #     DockerImageTag: ${{ parameters.imageTag }} 
+  #     deployToSlotOrAS: true
+  #     ResourceGroupName: ${{parameters.resourceGroupName}}
+  #     SlotName: staging
 
 
   - task: AzureCLI@2
