@@ -135,7 +135,7 @@ steps:
           exit 1
         }  
 
-   - task: AzureCLI@2
+  - task: AzureCLI@2
     displayName: 'remove deployment slot - ${{ upper(parameters.serviceName) }}'
     inputs:
       azureSubscription: ${{ parameters.azureSubscription }}
