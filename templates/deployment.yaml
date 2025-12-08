@@ -61,7 +61,7 @@ steps:
               --resource-group '${{ parameters.resourceGroupName }}' `
               --slot 'staging' `
               --configuration-source "$serviceName" `
-              --container-image-name "${{ parameters.registryName}}:${{ parameters.imageTag }}"
+              --container-image-name "${{ parameters.registryName}}:${{ parameters.imageTag }}" `
               --container-registry-password $(DockerPassword) `
               --container-registry-url devrwdinfac1401.azurecr.io `
               --container-registry-user devrwdinfac1401
