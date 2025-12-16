@@ -69,13 +69,13 @@ steps:
               dev/${{ upper(parameters.serviceName) }}.json => config/${{ upper(parameters.serviceName) }}.json
 
     - script: |
-      echo "Current directory:"
-      pwd
-      echo "List all directories:"
-      ls -la $(Build.SourcesDirectory)/dev
-      cat ./dev/${{ upper(parameters.serviceName) }}.json
-      cat ./dev/config/${{ upper(parameters.serviceName) }}.json
-    displayName: 'Debug - Check directories'
+        echo "Current directory:"
+        pwd
+        echo "List all directories:"
+        ls -la $(Build.SourcesDirectory)/dev
+        cat ./dev/${{ upper(parameters.serviceName) }}.json
+        cat ./dev/config/${{ upper(parameters.serviceName) }}.json
+      displayName: 'Debug - Check directories'
 
 
   - task: AzureCLI@2
