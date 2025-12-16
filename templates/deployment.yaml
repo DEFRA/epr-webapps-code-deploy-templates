@@ -75,7 +75,7 @@ steps:
         echo "List all directories:"
         ls -la $(Build.SourcesDirectory)/dev
         cat $(Build.SourcesDirectory)/dev/DEVRWDWEBWAX411.json
-        cat $(Build.SourcesDirectory)./dev/config/${{ upper(parameters.serviceName) }}.json
+        cat ./dev/config/${{ upper(parameters.serviceName) }}.json
       displayName: 'Debug - Check variable substitutiodirectories'
 
 
@@ -103,6 +103,14 @@ steps:
               --container-registry-url devrwdinfac1401.azurecr.io `
               --container-registry-user devrwdinfac1401
 
+            Write-Host "Use latest configuration in stagion slot"
+
+            az webapp config appsettings set `
+              --name "$serviceName" `
+              --resource-group $rg `
+              --slot 'staging' `
+              --settings @./dev/config/${{ variables.uppercaseServiceName }}.json `
+              --debug 
 
           } elseif ($serviceName -match "rwdwebfa") {
             Write-Host "Add staging slot to FA $serviceName"
