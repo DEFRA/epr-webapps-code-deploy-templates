@@ -50,9 +50,9 @@ steps:
       echo "List all directories:"
       ls -la $(Build.SourcesDirectory)
       echo "dev folder:"
-      ls -la $(Agent.WorkFolder)/1/s/dev
+      ls -la ./dev
       echo "${{ upper(parameters.serviceName) }}.json"
-      cat ./dev/DEVRWDWEBWAX411.json.json
+      cat ./dev/DEVRWDWEBWAX411.json
     displayName: 'Debug - Check directories'
 
   - ${{ if eq(parameters.targetEnvironment, 'development') }}:
@@ -74,7 +74,7 @@ steps:
         pwd
         echo "List all directories:"
         ls -la $(Build.SourcesDirectory)/dev
-        cat $(Build.SourcesDirectory)/dev/DEVRWDWEBWAX411.json.json
+        cat $(Build.SourcesDirectory)/dev/DEVRWDWEBWAX411.json
         cat $(Build.SourcesDirectory)./dev/config/${{ upper(parameters.serviceName) }}.json
       displayName: 'Debug - Check variable substitutiodirectories'
 
