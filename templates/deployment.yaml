@@ -51,7 +51,8 @@ steps:
       ls -la $(Build.SourcesDirectory)
       echo "dev folder:"
       ls -la $(Agent.WorkFolder)/1/s/dev
-      cat ./dev/${{ upper(parameters.serviceName) }}.json
+      echo "${{ upper(parameters.serviceName) }}.json"
+      cat ./dev/DEVRWDWEBWAX411.json.json
     displayName: 'Debug - Check directories'
 
   - ${{ if eq(parameters.targetEnvironment, 'development') }}:
@@ -66,14 +67,14 @@ steps:
         enableTransforms: true
         useLegacyEmptyFeature: false
         sources: |
-          dev/${{ upper(parameters.serviceName) }}.json => config/${{ upper(parameters.serviceName) }}.json
+          dev/DEVRWDWEBWAX411.json => config/${{ upper(parameters.serviceName) }}.json
 
     - script: |
         echo "Current directory:"
         pwd
         echo "List all directories:"
         ls -la $(Build.SourcesDirectory)/dev
-        cat $(Build.SourcesDirectory)/dev/${{ upper(parameters.serviceName) }}.json
+        cat $(Build.SourcesDirectory)/dev/DEVRWDWEBWAX411.json.json
         cat $(Build.SourcesDirectory)./dev/config/${{ upper(parameters.serviceName) }}.json
       displayName: 'Debug - Check variable substitutiodirectories'
 
