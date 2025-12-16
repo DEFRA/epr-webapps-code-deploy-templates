@@ -49,7 +49,7 @@ steps:
       pwd
       echo "List all directories:"
       ls -la $(Build.SourcesDirectory)
-      echo "Agent work folder:"
+      echo "dev folder:"
       ls -la $(Agent.WorkFolder)/1/s/dev
       cat ./dev/${{ upper(parameters.serviceName) }}.json
     displayName: 'Debug - Check directories'
