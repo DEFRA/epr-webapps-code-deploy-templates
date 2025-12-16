@@ -50,8 +50,33 @@ steps:
       echo "List all directories:"
       ls -la $(Build.SourcesDirectory)
       echo "Agent work folder:"
-      ls -la $(Agent.WorkFolder)/1/s/
+      ls -la $(Agent.WorkFolder)/1/s/dev
+      cat ./dev/${{ upper(parameters.serviceName) }}.json
     displayName: 'Debug - Check directories'
+
+  - ${{ if eq(parameters.targetEnvironment, 'development') }}:
+        - task: qetza.replacetokens.replacetokens-task.replacetokens@6
+          displayName: 'Replace tokens'
+          inputs:
+            tokenPattern: custom
+            tokenPrefix: '#{{'
+            tokenSuffix: '}}'
+            missingVarLog: error
+            useLegacyPattern: false
+            enableTransforms: true
+            useLegacyEmptyFeature: false
+            sources: |
+              dev/${{ upper(parameters.serviceName) }}.json => config/${{ upper(parameters.serviceName) }}.json
+
+    - script: |
+      echo "Current directory:"
+      pwd
+      echo "List all directories:"
+      ls -la $(Build.SourcesDirectory)/dev
+      cat ./dev/${{ upper(parameters.serviceName) }}.json
+      cat ./dev/config/${{ upper(parameters.serviceName) }}.json
+    displayName: 'Debug - Check directories'
+
 
   - task: AzureCLI@2
     displayName: 'add deployment slot - ${{ upper(parameters.serviceName) }}'
