@@ -42,6 +42,17 @@ steps:
   #         az acr login --name ${{ parameters.acrName }}
   #         az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
 
+  - checkout: ReleaseTags
+
+  - script: |
+      echo "Current directory:"
+      pwd
+      echo "List all directories:"
+      ls -la $(Build.SourcesDirectory)
+      echo "Agent work folder:"
+      ls -la $(Agent.WorkFolder)/1/s/
+    displayName: 'Debug - Check directories'
+
   - task: AzureCLI@2
     displayName: 'add deployment slot - ${{ upper(parameters.serviceName) }}'
     inputs:
