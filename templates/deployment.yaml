@@ -109,7 +109,7 @@ steps:
               --name "$serviceName" `
               --resource-group $rg `
               --slot 'staging' `
-              --settings @./dev/config/${{ variables.uppercaseServiceName }}.json `
+              --settings "@./dev/config/${{ upper(parameters.serviceName) }}.json" `
               --debug 
 
           } elseif ($serviceName -match "rwdwebfa") {
