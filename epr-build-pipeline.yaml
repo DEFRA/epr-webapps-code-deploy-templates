@@ -60,13 +60,16 @@ parameters:
 - name: RegulatorsServiceName
   type: string
   default: ''
+- name: AutomationTestingDirToggle
+  type: boolean
+  default: true
 
 resources:
   repositories:
     - repository: AutomationTesting
       name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
       type: git
-      ref: develop-template-fix
+      ref: develop-pipeline-fix
 
 stages:
 
@@ -174,23 +177,12 @@ stages:
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
     jobs:
 
-      - ${{ if eq(parameters.runAutomationTests, true) }}:
-        - job: RunAutomationTest
-          displayName: DEV4 Automation Testing
-          steps:
-            - checkout: AutomationTesting
-            - template: pipelines/automation-testing-template.yml@AutomationTesting
-              parameters:
-                env: 'dev4'
-                tags: '@sit'
-
       - job: DeployLatestMainDev4
         displayName: Deploy Latest Main to Dev4
-        dependsOn: RunAutomationTest
         steps:
           - template: templates/deployment.yaml
             parameters:
-              imageTag: 'main-latest'
+              imageTag: 'main-$(Build.BuildNumber)'
               azureSubscription: ${{ parameters.azureSubscription }}
               acrName: ${{ parameters.acrAzureContainerRegistryName }}
               registryName: ${{ parameters.acrRepositoryName }}
@@ -200,11 +192,10 @@ stages:
       - job: DeployToDev4Regulators
         displayName: Deploy Latest Main to Dev4 Regulators App
         condition: eq('${{parameters.additionalDeployments}}', true)
-        dependsOn: RunAutomationTest
         steps:
           - template: templates/deployment.yaml
             parameters:
-              imageTag: 'main-latest'
+              imageTag: 'main-$(Build.BuildNumber)'
               azureSubscription: ${{ parameters.azureSubscription }}
               acrName: ${{ parameters.acrAzureContainerRegistryName }}
               registryName: ${{ parameters.acrRepositoryName }}
@@ -214,7 +205,6 @@ stages:
       - job: RunLatestSQLMigrationDev4
         displayName: Run latest SQL Migration for Dev4
         condition: eq('${{parameters.buildMigrationScript}}', true)
-        dependsOn: RunAutomationTest
         steps:
           - template: templates/docker-run-sql-migration.yaml
             parameters:
@@ -223,4 +213,11 @@ stages:
               projectFolder: ${{ parameters.projectFolder }}
               azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
               repositoryName: ${{ parameters.acrRepositoryName }}
-              branchName: 'main-latest'
+              branchName: 'main-$(Build.BuildNumber)'
+
+      - ${{ if eq(parameters.runAutomationTests, true) }}:
+        - template: pipelines/automation-testing-template.yml@AutomationTesting            
+          parameters:
+            env: 'dev4'
+            tags: '@sit'
+            AutomationTestingDirToggle: ${{ parameters.AutomationTestingDirToggle }}
