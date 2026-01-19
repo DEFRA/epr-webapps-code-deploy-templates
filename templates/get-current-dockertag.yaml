@@ -1,0 +1,27 @@
+parameters:
+  - name: azureSubscription
+  - name: serviceName
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Current Docker Image Tag ${{ parameters.serviceName }}'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        Set-StrictMode -Version 3.0
+
+        $serviceName = "${{ parameters.serviceName }}"
+
+        if ($serviceName -match "rwdwebwa") {            
+          $currentImageTag = az webapp list --query "[?name=='$serviceName']" | jq -r '.[].siteConfig.linuxFxVersion'
+          Write-Host "Current docker image on $serviceName is $currentImageTag"
+        } elseif ($serviceName -match "rwdwebfa") {
+          $currentImageTag = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].siteConfig.linuxFxVersion'
+          Write-Host "Current docker image on $serviceName is $currentImageTag"
+        } else {
+          Write-Error "Unknown Service Type"
+          exit 1
+        }
+   
