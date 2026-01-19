@@ -2,7 +2,7 @@ parameters:
   - name: azureSubscription
   - name: serviceName
 
-    steps:
+steps:
   - task: AzureCLI@2
     displayName: 'Current Docker Image Tag ${{ parameters.serviceName }}'
     inputs:
