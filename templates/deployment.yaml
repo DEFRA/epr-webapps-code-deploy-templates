@@ -14,6 +14,11 @@ parameters:
   type: string
 
 steps:
+  - template: get-current-dockertag.yaml
+    parameters:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      serviceName: ${{ upper(parameters.serviceName) }}
+
   - bash: |
       echo "Deploying dockerImage --> "${{ parameters.registryName }}:${{ parameters.imageTag }} "to env --> "${{ parameters.targetEnvironment }}
       echo "Deploying dockerImage to "${{ upper(parameters.serviceName) }}
@@ -21,7 +26,7 @@ steps:
 
   - bash: |
       echo "##vso[task.setvariable variable=subscription]${{ parameters.azureSubscription }}"
-    displayName: 'Set Variable'
+    displayName: 'Set Variable'  
 
   - ${{ if ne(parameters.targetEnvironment, 'development') }}:
     - task: AzureKeyVault@2
@@ -31,7 +36,7 @@ steps:
         KeyVaultName: 'DEVRWDINFKV1401'
         SecretsFilter: 'DockerPassword'
         RunAsPreJob: true
-    
+
     - task: AzureCLI@2
       displayName: 'Copy Image to ${{ parameters.targetEnvironment }}'
       inputs:
@@ -77,6 +82,11 @@ steps:
           exit 1
         }
 
+  - template: get-current-dockertag.yaml
+    parameters:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      serviceName: ${{ upper(parameters.serviceName) }}
+   
   - task: AzureKeyVault@2
     condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
     displayName: 'Obtain WebhookUrl'
