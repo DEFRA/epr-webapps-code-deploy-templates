@@ -12,16 +12,16 @@ steps:
       inlineScript: |
         Set-StrictMode -Version 3.0
 
-        $serviceName = "${{ parameters.serviceName }}"
+        $serviceName = "${{ parameters.serviceName }}".ToUpper()
+        $currentImageTag = ""
 
-        if ($serviceName -match "rwdwebwa") {            
+        if ($serviceName -match "RWDWEBWA") {            
           $currentImageTag = az webapp list --query "[?name=='$serviceName']" | jq -r '.[].siteConfig.linuxFxVersion'
-          Write-Host "Current docker image on $serviceName is $currentImageTag"
-        } elseif ($serviceName -match "rwdwebfa") {
+        } elseif ($serviceName -match "RWDWEBFA") {
           $currentImageTag = az functionapp list --query "[?name=='$serviceName']" | jq -r '.[].siteConfig.linuxFxVersion'
-          Write-Host "Current docker image on $serviceName is $currentImageTag"
         } else {
           Write-Error "Unknown Service Type"
           exit 1
         }
+        Write-Host "##vso[task.setvariable variable=currentImageTag;]$currentImageTag"
    

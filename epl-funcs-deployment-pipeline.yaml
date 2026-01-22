@@ -22,6 +22,11 @@ stages:
         runOnce:
           deploy:
             steps:
+              - template: templates/get-current-dockertag.yaml
+                parameters:
+                  azureSubscription: ${{ parameters.azureSubscription }}
+                  serviceName: ${{ upper(parameters.funAppServiceName) }}
+                  
               - bash: |
                   echo "Deploying dockerImage -->"${{ parameters.registryName }}:${{ parameters.imageTag }} " to env --> "${{ parameters.targetEnvironment }}
                 displayName: "Show Environment Details"
