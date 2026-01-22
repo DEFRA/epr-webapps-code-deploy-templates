@@ -17,9 +17,10 @@ steps:
   - template: get-current-dockertag.yaml
     parameters:
       azureSubscription: ${{ parameters.azureSubscription }}
-      serviceName: ${{ upper(parameters.serviceName) }}
+      serviceName: ${{ parameters.serviceName }}
 
   - bash: |
+      echo "Current dockerImage for "${{ upper(parameters.serviceName) }}" --> $(currentImageTag)"
       echo "Deploying dockerImage --> "${{ parameters.registryName }}:${{ parameters.imageTag }} "to env --> "${{ parameters.targetEnvironment }}
       echo "Deploying dockerImage to "${{ upper(parameters.serviceName) }}
     displayName: 'Show Environment Details'
@@ -81,11 +82,6 @@ steps:
           Write-Error "Unknown Service Type"
           exit 1
         }
-
-  - template: get-current-dockertag.yaml
-    parameters:
-      azureSubscription: ${{ parameters.azureSubscription }}
-      serviceName: ${{ upper(parameters.serviceName) }}
    
   - task: AzureKeyVault@2
     condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
