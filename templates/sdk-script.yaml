@@ -9,7 +9,10 @@ parameters:
 steps:
   - script: |
       dotnet --list-sdks
-      if [ "${{ parameters.dotnetVersion }}" == "dotnetVersion8" ]; then
+      if [ "${{ parameters.dotnetVersion }}" == "dotnetVersion10" ]; then
+        echo '{"sdk":{"version":"10.0.100","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
+        cat ${{ parameters.solutionFolder }}/global.json
+      elif [ "${{ parameters.dotnetVersion }}" == "dotnetVersion8" ]; then
         echo '{"sdk":{"version":"8.0.303","rollForward":"latestFeature","allowPrerelease":false}}' > ${{ parameters.solutionFolder }}/global.json
         cat ${{ parameters.solutionFolder }}/global.json
       else

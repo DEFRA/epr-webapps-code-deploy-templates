@@ -85,7 +85,7 @@ stages:
           - template: templates/sdk-script.yaml
             parameters:
               solutionFolder: ${{ parameters.solutionFolder }}
-              dotnetVersion: ${{ parameters.testProjectFolder }}
+              dotnetVersion: ${{ parameters.dotnetVersion }}
 
       - job: AnalyseAndTest
         displayName: Run Unit Tests and SonarQube steps
@@ -103,8 +103,6 @@ stages:
               runIntegrationTests: ${{ parameters.runIntegrationTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-
-
 
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan

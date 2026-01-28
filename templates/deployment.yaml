@@ -27,7 +27,7 @@ steps:
 
   - bash: |
       echo "##vso[task.setvariable variable=subscription]${{ parameters.azureSubscription }}"
-    displayName: 'Set Variable'  
+    displayName: 'Set Variable'
 
   - ${{ if ne(parameters.targetEnvironment, 'development') }}:
     - task: AzureKeyVault@2
@@ -37,7 +37,7 @@ steps:
         KeyVaultName: 'DEVRWDINFKV1401'
         SecretsFilter: 'DockerPassword'
         RunAsPreJob: true
-
+    
     - task: AzureCLI@2
       displayName: 'Copy Image to ${{ parameters.targetEnvironment }}'
       inputs:
@@ -82,7 +82,7 @@ steps:
           Write-Error "Unknown Service Type"
           exit 1
         }
-   
+  
   - task: AzureKeyVault@2
     condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
     displayName: 'Obtain WebhookUrl'

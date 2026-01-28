@@ -64,9 +64,8 @@ steps:
     inputs:
       projectName: 'owasptest'
       scanPath: '${{parameters.solutionFolder}}/**/*.csproj'
-      format: 'XML, HTML'
-      additionalArguments: '--nvdDatafeed https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-{0}.json.gz --log $(Build.ArtifactStagingDirectory)/dependency-check.log --exclude "**/*.UnitTests.csproj"'
-      nvdApiKey: $(OwaspNVDKey)
+      format: 'HTML,JSON,JUNIT'
+      additionalArguments: '--nvdApiKey $(OwaspNVDKey) --log $(Build.ArtifactStagingDirectory)/dependency-check.log --data "$(DEPENDENCY_CHECK_DATA)"'
 
   - task: DownloadBuildArtifacts@1
     displayName: 'Download Pipeline Artifact'
@@ -86,9 +85,7 @@ steps:
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'JUnit'
-      testResultsFiles: 'dependency-check/dependency-check-report.xml'
-      searchFolder: '$(System.DefaultWorkingDirectory)'
+      testResultsFiles: 'dependency-check/*junit.xml'
+      searchFolder: '$(Common.TestResultsDirectory)'
       testRunTitle: 'Dependency Check'
-      buildPlatform: 'owasp'
-      mergeTestResults: 'true'
-      buildConfiguration: '$(BuildConfiguration)'
+      mergeTestResults: true
