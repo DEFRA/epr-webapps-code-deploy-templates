@@ -11,8 +11,10 @@
 
 steps:
   - script: |
-      echo '${{parameters.solutionFolder}}'
-    displayName: 'Root Folder to Scan'
+      echo 'Working Folder: $(System.DefaultWorkingDirectory)'
+      echo 'Solution Folder: ${{parameters.solutionFolder}}'
+      echo 'Project Folder: ${{parameters.projectFolder}}'
+    displayName: 'Target Folders'
 
   - task: PythonScript@0
     displayName: 'Replace Cyrillic Characters in .csproj File'
@@ -64,6 +66,19 @@ steps:
       azureSubscription: 'AZD-RWD-DEV1'
       KeyVaultName: 'DEVRWDINFKV1401'
       SecretsFilter: 'OwaspNVDOssPassword'
+      
+  - bash: |
+      if [ -f "$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/${{parameters.projectFolder}}/package.json" ]; then
+        echo "##vso[task.setvariable variable=NodeProjectExists]true"
+      fi
+    displayName: 'Check if package.json exists'
+      
+  - task: Npm@1
+    condition: and(succeeded(), eq(variables['NodeProjectExists'], 'true')) 
+    inputs:
+      command: 'install'
+      workingDir: $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/${{parameters.projectFolder}}
+    displayName: 'Run npm install'
 
   - script: |
       docker pull owasp/dependency-check-action:latest
