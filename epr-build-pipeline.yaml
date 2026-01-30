@@ -38,7 +38,7 @@ parameters:
   default: ''
 - name: runOWASPScan
   type: boolean
-  default: false
+  default: true
 - name: gitleaksFailOnSecretDetection
   type: boolean
   default: true
@@ -72,11 +72,8 @@ resources:
       ref: develop-pipeline-fix
 
 stages:
-
-
   - stage: ValidateAndBuild
     jobs:
-
       - job: RunDotnetSDKScript
         displayName: Run Dotnet SDK Script
         steps:
@@ -137,7 +134,7 @@ stages:
             - template: templates/owaspcheck.yaml
               parameters:
                 solutionFolder: ${{ parameters.solutionFolder }}
-                testProjectFolder: ${{ parameters.testProjectFolder }}
+                projectFolder: ${{ parameters.projectFolder }}
                 componentDirectory: ${{ parameters.componentDirectory }}
 
       - job: BuildAndPushDockerImage

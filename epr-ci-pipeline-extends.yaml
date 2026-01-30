@@ -7,17 +7,17 @@ stages:
   - stage: doingOWASPandDockerBuild
     jobs:
 
-    #- job: RunOWASPTests
-    #  displayName: Run OWASP Dependency checks
-    #  steps:
-    #    - template: templates/owaspcheck.yaml
-    #      parameters:
-    #        solutionFolder: $(solutionFolder)
-    #        testProjectFolder: $(testProjectFolder)
+    - job: RunOWASPTests
+      displayName: Run OWASP Dependency checks
+      steps:
+        - template: templates/owaspcheck.yaml
+          parameters:
+            solutionFolder: $(solutionFolder)
+            projectFolder: $(testProjectFolder)
 
     - job: BuildAndPushDockerImage
       displayName: Build and Push Docker Image
-      #dependsOn: RunOWASPTests
+      dependsOn: RunOWASPTests
       steps:
         - template: templates/docker.yaml
           parameters:
