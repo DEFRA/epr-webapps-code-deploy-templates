@@ -18,30 +18,7 @@ parameters:
 
 
 jobs:
-- job: ShowDeprecationWarning
-  displayName: DEPRECATED - Repository Has Moved
-  steps:
-    - bash: |
-        echo "##vso[task.logissue type=warning]DEPRECATED: This Azure DevOps template repository has moved to GitHub."
-        echo "##vso[task.logissue type=warning]New location: https://github.com/DEFRA/epr-webapps-code-deploy-templates"
-        echo "##vso[task.logissue type=warning]Please update your pipeline references to use the new GitHub repository."
-        echo ""
-        echo "========================================"
-        echo "  DEPRECATION NOTICE"
-        echo "========================================"
-        echo ""
-        echo "  This template repository has moved to GitHub."
-        echo ""
-        echo "  New location:"
-        echo "  https://github.com/DEFRA/epr-webapps-code-deploy-templates"
-        echo ""
-        echo "  Please update your pipeline to use the new repository."
-        echo ""
-        echo "========================================"
-      displayName: Deprecation Warning
-
 - deployment: 'DeployAppCode'
-  dependsOn: ShowDeprecationWarning
   environment: ${{ parameters.targetEnvironment }}
   strategy:
     runOnce:

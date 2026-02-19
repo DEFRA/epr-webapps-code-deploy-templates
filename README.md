@@ -1,40 +1,27 @@
-# DEPRECATED - Repository Has Moved
+# epr-webapps-code-deploy-templates
 
-This repository has been migrated to GitHub and is no longer accepting changes.
+This repository hosts the common templates used in other repositories for EPR - RPD.
 
-## New Location
+## Usage
 
-<https://github.com/DEFRA/epr-webapps-code-deploy-templates>
+The templates hosted here are not intended to be used on their own, but to be extended by or included in other Azure pipelines. See [Azure documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops&pivots=templates-includes) for the how-to.
 
-Please update your pipeline references to use the new GitHub repository.
+## Contributing to this project
 
-## Migration Example
+Please read the [contribution guidelines](/CONTRIBUTING.md) before submitting a pull request.
 
-Before (Azure DevOps):
+## Licence
 
-```yaml
-resources:
-  repositories:
-    - repository: CommonTemplates
-      name: RWD-CPR-EPR4P-ADO/epr-webapps-code-deploy-templates
-      type: git
-      ref: main
-```
+THIS INFORMATION IS LICENSED UNDER THE CONDITIONS OF THE OPEN GOVERNMENT LICENCE found at:
 
-After (GitHub):
+<http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3>
 
-```yaml
-resources:
-  repositories:
-    - repository: CommonTemplates
-      name: DEFRA/epr-webapps-code-deploy-templates
-      type: github
-      endpoint: defra
-      ref: main
-```
+The following attribution statement MUST be cited in your products and applications when using this information.
 
-e.g. <https://github.com/DEFRA/epr-regulator-service/blob/7ad19cef3cb7ddddd34a124e896847c300e69599/pipelines/ci_pipeline.yaml#L40-L46>
+>Contains public sector information licensed under the Open Government licence v3
 
-## More info
+### About the licence
 
-<https://eaflood.atlassian.net/browse/AMCR-49>
+The Open Government Licence (OGL) was developed by the Controller of Her Majesty's Stationery Office (HMSO) to enable information providers in the public sector to license the use and re-use of their information under a common open licence.
+
+It is designed to encourage use and re-use of information freely and flexibly, with only a few conditions.
