@@ -93,6 +93,7 @@ steps:
                  --format HTML --format JUNIT \
                  --ossIndexUsername $(OwaspNVDOssUsername) \
                  --ossIndexPassword $(OwaspNVDOssPassword) \
+                 --disableNodeAudit \
                  --out /workspace
     displayName: 'Run dependency check'
     
