@@ -69,6 +69,9 @@ steps:
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
 
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.SourceVersion)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.SourceVersion)
+
         elif [[ $(branchName) == releases* ]]
           then
             echo -e "\033[0;32m Procesing RELEASES image"
@@ -78,9 +81,15 @@ steps:
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
 
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.SourceVersion)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.SourceVersion)
+
         else
             docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
             docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.BuildNumber)
+
+            docker tag ${{parameters.imageName}}:$(Build.BuildNumber) ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.SourceVersion)
+            docker push ${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:$(branchName)-$(Build.SourceVersion)
         fi
 
   - bash: |
@@ -93,11 +102,14 @@ steps:
           then
             echo -e "\033[0;32m $(branchName)-latest"
             echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
+            echo -e "\033[0;32m $(branchName)-$(Build.SourceVersion)"
         elif [[ $(branchName) == releases* ]]
           then
             echo -e "\033[0;32m $(branchName)"
             echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
+            echo -e "\033[0;32m $(branchName)-$(Build.SourceVersion)"
         else
             echo -e "\033[0;32m $(branchName)-$(Build.BuildNumber)"
+            echo -e "\033[0;32m $(branchName)-$(Build.SourceVersion)"
         fi
     displayName: "NAME OF THE IMAGE"
