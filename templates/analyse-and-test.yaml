@@ -62,13 +62,13 @@ steps:
         projects: ${{ parameters.projectFolder }}/*.csproj
 
   - task: DotNetCoreCLI@2
-    displayName: 'Run Tests'
+    displayName: 'Run Unit Tests'
     condition: eq(${{parameters.runTests}}, true)
     inputs:
       command: test
       ${{ if eq(parameters.testFolder, '') }}:
         projects: |
-          **/*[Tt]ests/*.csproj
+          **/*[Uu]nit[Tt]ests/*.csproj
       ${{else}}:
         projects:  |
           ${{ parameters.testFolder}}/**/*.csproj
