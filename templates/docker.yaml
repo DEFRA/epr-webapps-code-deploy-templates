@@ -49,7 +49,7 @@ steps:
       buildContext: ${{parameters.solutionFolder}}/${{parameters.componentDirectory}}
       dockerfile: ${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.projectFolder}}/Dockerfile
       tags: $(Build.BuildNumber)
-      arguments: '--build-arg PAT=$(VSS_NUGET_ACCESSTOKEN)'
+      arguments: '--build-arg PAT=$(VSS_NUGET_ACCESSTOKEN) --build-arg BUILD_NUMBER=$(Build.BuildNumber) --build-arg GIT_SHA=$(Build.SourceVersion)'
 
   - task: AzureCLI@2
     displayName: 'Push Docker Image to ACR'
