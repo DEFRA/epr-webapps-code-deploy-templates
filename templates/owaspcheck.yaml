@@ -106,7 +106,7 @@ steps:
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/dependency-check-report.html'
-      artifact: 'OWASP DOCKER HTML'
+      artifact: $(System.JobAttempt)-owasp-report
       publishLocation: 'pipeline'
     displayName: 'Publish OWASP Artifact'
   
