@@ -16,6 +16,9 @@ parameters:
 - name: runTests
   type: boolean
   default: true
+- name: testPattern
+  type: string
+  default: ''
 - name: runIntegrationTests
   type: boolean
   default: false
@@ -97,6 +100,7 @@ stages:
               sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
               sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
               runTests: ${{ parameters.runTests }}
+              testPattern: ${{ parameters.testPattern }}
               runIntegrationTests: ${{ parameters.runIntegrationTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}

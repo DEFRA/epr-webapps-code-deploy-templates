@@ -8,6 +8,9 @@ parameters:
   - name: testFolder
     type: string
     default: ''
+  - name: testPattern
+    type: string
+    default: ''
   - name: sonarQubeProjectKey
     type: string
   - name: sonarQubeProjectName
@@ -66,12 +69,12 @@ steps:
     condition: eq(${{parameters.runTests}}, true)
     inputs:
       command: test
-      ${{ if eq(parameters.testFolder, '') }}:
+      ${{ if eq(parameters.testPattern, '') }}:
         projects: |
           **/*[Uu]nit[Tt]ests/*.csproj
       ${{else}}:
         projects:  |
-          ${{ parameters.testFolder}}/**/*.csproj
+          ${{ parameters.testPattern}}
       arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
       publishTestResults: true
 
