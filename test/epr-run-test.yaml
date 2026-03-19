@@ -7,5 +7,4 @@ extends:
   template: epr-test-build-agents.yaml
   parameters:
     azureSubscription: 'AZD-RWD-DEV8'
-    functionAppName: 'DEVRWDWEBFA8401'
-    targetEnvironment: 'PRD1'
+    targetEnvironment: 'DEV8'
