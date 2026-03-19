@@ -11,17 +11,18 @@ parameters:
         - 'windows'
   - name: pool
     type: string
-    default: 'DEFRA-COMMON-UBUNTU-SSV3'
+    default: ''
 
 jobs:
   - job: 'TestPoolSelection'
-    pool:
-      ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
+    ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
+      pool:
         ${{ if eq(lower(parameters.poolOS), 'windows') }}:
           name: DEFRA-COMMON-WINDOWS-SSV5
         ${{ else }}:
           name: DEFRA-COMMON-UBUNTU-SSV5
-      ${{ else }}:
+    ${{ elseif ne(parameters.pool, '') }}:
+      pool:
         name: ${{ parameters.pool }}
     steps:   
       - task: AzureCLI@2

@@ -1,11 +1,9 @@
 trigger: none
 pr: none
-# pool: DEFRA-COMMON-WINDOWS-SSV3
 appendCommitMessageToRunName: false
 
 extends:
   template: epr-test-build-agents.yaml
   parameters:
     azureSubscription: 'AZD-RWD-DEV8'
-    targetEnvironment: 'DEV8'
-    pool: DEFRA-COMMON-WINDOWS-SSV3
+    targetEnvironment: 'pRd99'
