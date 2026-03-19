@@ -1,6 +1,6 @@
 trigger: none
 pr: none
-# pool: DEFRA-COMMON-UBUNTU-SSV5
+pool: DEFRA-COMMON-WINDOWS-SSV5
 appendCommitMessageToRunName: false
 
 extends:
