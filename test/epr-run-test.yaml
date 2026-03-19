@@ -6,4 +6,5 @@ extends:
   template: epr-test-build-agents.yaml
   parameters:
     azureSubscription: 'AZD-RWD-DEV8'
-    targetEnvironment: 'pRd99'
+    targetEnvironment: 'pre'
+    poolOS: 'windows'
