@@ -1,6 +1,6 @@
 trigger: none
 pr: none
-pool: DEFRA-COMMON-WINDOWS-SSV5
+# pool: DEFRA-COMMON-WINDOWS-SSV3
 appendCommitMessageToRunName: false
 
 extends:
@@ -8,3 +8,4 @@ extends:
   parameters:
     azureSubscription: 'AZD-RWD-DEV8'
     targetEnvironment: 'DEV8'
+    pool: DEFRA-COMMON-WINDOWS-SSV3
