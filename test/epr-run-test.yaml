@@ -1,6 +1,5 @@
 trigger: none
 pr: none
-pool: DEFRA-COMMON-WINDOWS-SSV3
 appendCommitMessageToRunName: false
 
 extends:
