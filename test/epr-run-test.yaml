@@ -1,0 +1,11 @@
+trigger: none
+pr: none
+# pool: DEFRA-COMMON-UBUNTU-SSV5
+appendCommitMessageToRunName: false
+
+extends:
+  template: epr-test-build-agents.yaml
+  parameters:
+    azureSubscription: 'AZD-RWD-DEV8'
+    functionAppName: 'DEVRWDWEBFA8401'
+    targetEnvironment: 'PRD1'

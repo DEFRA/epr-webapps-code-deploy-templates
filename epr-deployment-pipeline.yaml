@@ -15,11 +15,28 @@ parameters:
 - name: runAutomationTests #will let us toggle automation tests on or off
   type: boolean
   default: true
+- name: poolOS
+  type: string
+  default: 'ubuntu'
+  values:
+      - 'ubuntu'
+      - 'windows'
+- name: pool
+  type: string
+  default: 'DEFRA-COMMON-UBUNTU-SSV3'
 
 
 jobs:
 - deployment: 'DeployAppCode'
   environment: ${{ parameters.targetEnvironment }}
+  pool:
+    ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
+      ${{ if eq(lower(parameters.poolOS), 'windows') }}:
+        name: DEFRA-COMMON-WINDOWS-SSV5
+      ${{ else }}:
+        name: DEFRA-COMMON-UBUNTU-SSV5
+    ${{ else }}:
+      name: ${{ parameters.pool }}
   strategy:
     runOnce:
       deploy:
