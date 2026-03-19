@@ -1,9 +1,0 @@
-trigger: none
-pr: none
-appendCommitMessageToRunName: false
-
-extends:
-  template: epr-test-build-agents.yaml
-  parameters:
-    azureSubscription: 'AZD-RWD-DEV8'
-    targetEnvironment: 'DEV8'
