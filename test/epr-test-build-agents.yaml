@@ -24,6 +24,9 @@ jobs:
     ${{ elseif ne(parameters.pool, '') }}:
       pool:
         name: ${{ parameters.pool }}
+    ${{ else }}:
+      pool:
+        name: DEFRA-COMMON-UBUNTU-SSV3
     steps:   
       - task: AzureCLI@2
         displayName: 'Test pool selection in ${{ parameters.targetEnvironment }} environment, ${{ parameters.poolOS }} OS, and ${{ parameters.pool }} pool.'
