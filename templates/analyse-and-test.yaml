@@ -28,6 +28,8 @@ parameters:
     type: string
     default: SonarQube
 
+variables:
+  - group: integration-test-secrets
 
 steps:
   - task: SonarQubePrepare@6
@@ -93,6 +95,8 @@ steps:
   - task: DotNetCoreCLI@2
     displayName: 'Run Integration Tests'
     condition: eq(${{parameters.runIntegrationTests}}, true)
+    env:
+      CosmosAccountKey: $(CosmosAccountKey)
     inputs:
       command: test
       ${{ if eq(parameters.testFolder, '') }}:
