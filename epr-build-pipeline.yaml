@@ -93,6 +93,8 @@ stages:
       - job: AnalyseAndTest
         displayName: Run Unit Tests and SonarQube steps
         dependsOn: ''
+        variables:
+          - group: integration-test-secrets
         steps:
           - checkout: self          # Force full history for SonarQube analysis
             fetchDepth: 0
