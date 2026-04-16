@@ -80,45 +80,42 @@ steps:
       workingDir: $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/${{parameters.projectFolder}}
     displayName: 'Run npm install'
 
-  - script: |
-      docker pull owasp/dependency-check-action:latest
-    displayName: 'Pull OWASP Image'
-
-  - task: Cache@2
+  - task: dependency-check-build-task@6
     inputs:
-      key: 'dependency-check | "$(Agent.OS)" | week-$(Date:yyyy-ww)'
-      restoreKeys: |
-        dependency-check | "$(Agent.OS)"
-      path: $(Pipeline.Workspace)/dependency-check-data
-    displayName: 'Cache OWASP Dependency-Check data'
+      projectName: '${{parameters.projectFolder}}'
+      scanPath: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}'
+      format: 'HTML, JUNIT'
+      uploadReports: true
+      reportFilename: 'dependency-check-report.html'
+      nvdApiKey: $(OwaspNVDKey)
     
-  - script: |
-      docker run --rm -v $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}:/workspace owasp/dependency-check-action:latest \
-                 -v $(Pipeline.Workspace)/dependency-check-data:/usr/share/dependency-check/data \
-                 --data /usr/share/dependency-check/data -debug \
-                 --nvdApiKey $(OwaspNVDKey) \
-                 --project ${{parameters.projectFolder}} \
-                 --scan /workspace \
-                 --exclude '**/*Tests.csproj' \
-                 --format HTML --format JUNIT \
-                 --ossIndexUsername $(OwaspNVDOssUsername) \
-                 --ossIndexPassword $(OwaspNVDOssPassword) \
-                 --out /workspace
-    displayName: 'Run dependency check'
+  # - script: |
+  #     docker run --rm -v $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}:/workspace owasp/dependency-check-action:latest \
+  #                -v $(Pipeline.Workspace)/dependency-check-data:/usr/share/dependency-check/data \
+  #                --data /usr/share/dependency-check/data -debug \
+  #                --nvdApiKey $(OwaspNVDKey) \
+  #                --project ${{parameters.projectFolder}} \
+  #                --scan /workspace \
+  #                --exclude '**/*Tests.csproj' \
+  #                --format HTML --format JUNIT \
+  #                --ossIndexUsername $(OwaspNVDOssUsername) \
+  #                --ossIndexPassword $(OwaspNVDOssPassword) \
+  #                --out /workspace
+  #   displayName: 'Run dependency check'
     
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: 'dependency-check-junit.xml'
-      searchFolder: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}'
-    displayName: 'Publish Dependency Check Test Results if Available'
+  # - task: PublishTestResults@2
+  #   inputs:
+  #     testResultsFormat: 'JUnit'
+  #     testResultsFiles: 'dependency-check-junit.xml'
+  #     searchFolder: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}'
+  #   displayName: 'Publish Dependency Check Test Results if Available'
 
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/dependency-check-report.html'
-      artifact: $(System.JobAttempt)-owasp-report
-      publishLocation: 'pipeline'
-    displayName: 'Publish OWASP Artifact'
+  # - task: PublishPipelineArtifact@1
+  #   inputs:
+  #     targetPath: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/dependency-check-report.html'
+  #     artifact: $(System.JobAttempt)-owasp-report
+  #     publishLocation: 'pipeline'
+  #   displayName: 'Publish OWASP Artifact'
   
   # Not needed, probably given the short lifetime of agent, left commented out in case of future need:
   #- script: |
