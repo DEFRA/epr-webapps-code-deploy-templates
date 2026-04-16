@@ -83,9 +83,18 @@ steps:
   - script: |
       docker pull owasp/dependency-check-action:latest
     displayName: 'Pull OWASP Image'
+
+  - task: Cache@2
+    inputs:
+      key: 'dependency-check | "$(Agent.OS)" | week-$(Date:yyyy-ww)'
+      restoreKeys: |
+        dependency-check | "$(Agent.OS)"
+      path: $(Pipeline.Workspace)/dependency-check-data
+    displayName: 'Cache OWASP Dependency-Check data'
     
   - script: |
       docker run --rm -v $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}:/workspace owasp/dependency-check-action:latest \
+                 -v $(Pipeline.Workspace)/dependency-check-data:/usr/share/dependency-check/data \
                  --nvdApiKey $(OwaspNVDKey) \
                  --project ${{parameters.projectFolder}} \
                  --scan /workspace \
