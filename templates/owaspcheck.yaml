@@ -95,6 +95,7 @@ steps:
   - script: |
       docker run --rm -v $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}:/workspace owasp/dependency-check-action:latest \
                  -v $(Pipeline.Workspace)/dependency-check-data:/usr/share/dependency-check/data \
+                 --data /usr/share/dependency-check/data -debug \
                  --nvdApiKey $(OwaspNVDKey) \
                  --project ${{parameters.projectFolder}} \
                  --scan /workspace \
