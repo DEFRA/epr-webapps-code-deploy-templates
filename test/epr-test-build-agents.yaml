@@ -19,12 +19,13 @@ ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(p
       name: DEFRA-COMMON-WINDOWS-SSV5
     ${{ else }}:
       name: DEFRA-COMMON-UBUNTU-SSV5
-${{ elseif ne(parameters.pool, '') }}:
-  pool:
-    name: ${{ parameters.pool }}
 ${{ else }}:
-  pool:
-    name: DEFRA-COMMON-UBUNTU-SSV3
+  ${{ if ne(parameters.pool, '') }}:
+    pool:
+      name: ${{ parameters.pool }}
+  ${{ else }}:
+    pool:
+      name: DEFRA-COMMON-UBUNTU-SSV3
 
 jobs:
   - job: 'TestPoolSelection'
