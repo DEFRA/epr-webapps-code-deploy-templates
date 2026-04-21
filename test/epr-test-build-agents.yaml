@@ -13,18 +13,16 @@ parameters:
     type: string
     default: ''
 
-${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
-  pool:
+pool:
+  ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
     ${{ if eq(lower(parameters.poolOS), 'windows') }}:
       name: DEFRA-COMMON-WINDOWS-SSV5
     ${{ else }}:
       name: DEFRA-COMMON-UBUNTU-SSV5
-${{ else }}:
-  ${{ if ne(parameters.pool, '') }}:
-    pool:
-      name: ${{ parameters.pool }}
   ${{ else }}:
-    pool:
+    ${{ if ne(parameters.pool, '') }}:
+      name: ${{ parameters.pool }}
+    ${{ else }}:
       name: DEFRA-COMMON-UBUNTU-SSV3
 
 jobs:
