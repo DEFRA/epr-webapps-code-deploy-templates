@@ -5,5 +5,5 @@ appendCommitMessageToRunName: false
 extends:
   template: epr-test-build-agents.yaml
   parameters:
-    azureSubscription: 'AZD-RWD-DEV8'
-    targetEnvironment: 'DEV8'
+    azureSubscription: 'AZR-RWD-PRE1'
+    targetEnvironment: 'PRE1'
