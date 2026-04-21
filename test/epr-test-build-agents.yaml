@@ -13,20 +13,21 @@ parameters:
     type: string
     default: ''
 
+${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
+  pool:
+    ${{ if eq(lower(parameters.poolOS), 'windows') }}:
+      name: DEFRA-COMMON-WINDOWS-SSV5
+    ${{ else }}:
+      name: DEFRA-COMMON-UBUNTU-SSV5
+${{ elseif ne(parameters.pool, '') }}:
+  pool:
+    name: ${{ parameters.pool }}
+${{ else }}:
+  pool:
+    name: DEFRA-COMMON-UBUNTU-SSV3
+
 jobs:
   - job: 'TestPoolSelection'
-    ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
-      pool:
-        ${{ if eq(lower(parameters.poolOS), 'windows') }}:
-          name: DEFRA-COMMON-WINDOWS-SSV5
-        ${{ else }}:
-          name: DEFRA-COMMON-UBUNTU-SSV5
-    ${{ elseif ne(parameters.pool, '') }}:
-      pool:
-        name: ${{ parameters.pool }}
-    ${{ else }}:
-      pool:
-        name: DEFRA-COMMON-UBUNTU-SSV3
     steps:   
       - task: AzureCLI@2
         displayName: 'Test pool selection in ${{ parameters.targetEnvironment }} environment, ${{ parameters.poolOS }} OS, and ${{ parameters.pool }} pool.'
