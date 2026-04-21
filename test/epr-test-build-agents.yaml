@@ -1,39 +1,44 @@
 parameters:
-  - name: azureSubscription
-    type: string
-  - name: targetEnvironment
-    type: string
-  - name: poolOS
-    type: string
-    default: 'ubuntu'
-    values:
-        - 'ubuntu'
-        - 'windows'
-  - name: pool
-    type: string
-    default: ''
+- name: azureSubscription
+  type: string
+- name: targetEnvironment
+  type: string
+- name: poolOS
+  type: string
+  default: 'ubuntu'
+  values:
+      - 'ubuntu'
+      - 'windows'
+- name: pool
+  type: string
+  default: ''
+
 
 jobs:
-  - job: 'TestPoolSelection'
-    pool:
-      ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
-        ${{ if eq(lower(parameters.poolOS), 'windows') }}:
-          name: DEFRA-COMMON-WINDOWS-SSV5
-        ${{ else }}:
-          name: DEFRA-COMMON-UBUNTU-SSV5
+- deployment: 'TestPoolSelection'
+  environment: ${{ parameters.targetEnvironment }}
+  pool:
+    ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
+      ${{ if eq(lower(parameters.poolOS), 'windows') }}:
+        name: DEFRA-COMMON-WINDOWS-SSV5
       ${{ else }}:
-        ${{ if ne(parameters.pool, '') }}:
-          name: ${{ parameters.pool }}
-        ${{ else }}:
-          name: DEFRA-COMMON-UBUNTU-SSV3
-    steps:
-      - task: AzureCLI@2
-        displayName: 'Test pool selection in ${{ parameters.targetEnvironment }} environment, ${{ parameters.poolOS }} OS, and ${{ parameters.pool }} pool.'
-        inputs:
-          azureSubscription: ${{ parameters.azureSubscription }}
-          scriptType: 'pscore'
-          scriptLocation: 'inlineScript'
-          inlineScript: |
-            echo "Target Environment: ${{ parameters.targetEnvironment }}"
-            echo "Pool OS: ${{ parameters.poolOS }}"
-            echo "Pool: ${{ parameters.pool }}"
+        name: DEFRA-COMMON-UBUNTU-SSV5
+    ${{ else }}:
+      ${{ if ne(parameters.pool, '') }}:
+        name: ${{ parameters.pool }}
+      ${{ else }}:
+        name: DEFRA-COMMON-UBUNTU-SSV3
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Test pool selection in ${{ parameters.targetEnvironment }} environment, ${{ parameters.poolOS }} OS, and ${{ parameters.pool }} pool.'
+            inputs:
+              azureSubscription: ${{ parameters.azureSubscription }}
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Target Environment: ${{ parameters.targetEnvironment }}"
+                echo "Pool OS: ${{ parameters.poolOS }}"
+                echo "Pool: ${{ parameters.pool }}"
