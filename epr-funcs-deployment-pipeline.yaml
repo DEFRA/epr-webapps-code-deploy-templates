@@ -24,13 +24,16 @@ parameters:
 - name: pool
   type: string
   default: ''
+- name: envToDeploy
+  type: string
+  default: ''
 
 
 jobs:
 - deployment: 'DeployAppCode'
   environment: ${{ parameters.targetEnvironment }}
   pool:
-    ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
+    ${{ if or(contains(lower(parameters.envToDeploy), 'pre'), contains(lower(parameters.envToDeploy), 'prod')) }}:
       ${{ if eq(lower(parameters.poolOS), 'windows') }}:
         name: DEFRA-COMMON-WINDOWS-SSV5
       ${{ else }}:
