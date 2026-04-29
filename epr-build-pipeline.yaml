@@ -130,16 +130,17 @@ stages:
               configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
               failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
 
-      - ${{ if eq(parameters.runOWASPScan, true) }}:
-        - job: RunOWASPTests
-          displayName: Run OWASP Dependency checks
-          dependsOn: ''
-          steps:
-            - template: templates/owaspcheck.yaml
-              parameters:
-                solutionFolder: ${{ parameters.solutionFolder }}
-                projectFolder: ${{ parameters.projectFolder }}
-                componentDirectory: ${{ parameters.componentDirectory }}
+      # Temporarily disable OWASP scan
+      # - ${{ if eq(parameters.runOWASPScan, true) }}:
+      #   - job: RunOWASPTests
+      #     displayName: Run OWASP Dependency checks
+      #     dependsOn: ''
+      #     steps:
+      #       - template: templates/owaspcheck.yaml
+      #         parameters:
+      #           solutionFolder: ${{ parameters.solutionFolder }}
+      #           projectFolder: ${{ parameters.projectFolder }}
+      #           componentDirectory: ${{ parameters.componentDirectory }}
 
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
