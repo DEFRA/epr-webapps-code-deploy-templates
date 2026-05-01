@@ -5,40 +5,13 @@
   - name: projectFolder
     type: string
     default: ''
-  - name: componentDirectory
-    type: string
-    default: ''
 
 steps:
   - script: |
       echo 'Working Folder: $(System.DefaultWorkingDirectory)'
       echo 'Solution Folder: ${{parameters.solutionFolder}}'
       echo 'Project Folder: ${{parameters.projectFolder}}'
-    displayName: 'Target Folders'
-
-  - task: PythonScript@0
-    displayName: 'Replace Cyrillic Characters in .csproj File'
-    inputs:
-      scriptSource: 'inline'
-      script: |
-        import os
-        def replace_cyrillic_with_latin(file_path):
-            cyrillic_to_latin = {'о': 'o', 'е': 'e', 'х': 'x'}
-            with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read()
-            for cyrillic_char, latin_char in cyrillic_to_latin.items():
-                content = content.replace(cyrillic_char, latin_char)
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(content)
-
-        def file_exists(file_path):
-          return os.path.isfile(file_path)
-
-
-        file_path = '$(Build.SourcesDirectory)/src/EPR.Payment.Facade.Common.UnitTests/EPR.Payment.Facade.Common.UnitTests.csproj'
-        if file_exists(file_path): 
-          replace_cyrillic_with_latin(file_path)
-          print(f'Replaced Cyrillic characters with Latin characters in {file_path}.')
+    displayName: Debug Input Parameters
         
   - task: DockerInstaller@0
     displayName: 'Docker Installer'
@@ -66,6 +39,49 @@ steps:
       azureSubscription: 'AZD-RWD-DEV1'
       KeyVaultName: 'DEVRWDINFKV1401'
       SecretsFilter: 'OwaspNVDOssPassword'
+
+  - task: PowerShell@2
+    displayName: Create data directory
+    inputs:
+      targetType: inline
+      script: |
+        Write-Host "Creating directory: dependency-check-data"
+        New-Item -ItemType Directory -Path "dependency-check-data" -Force | Out-Null
+
+  - task: AzureCLI@2
+    displayName: Download existing DB
+    inputs:
+      azureSubscription: AZD-RWD-DEV1
+      scriptType: pscore
+      scriptLocation: inlineScript
+      inlineScript: |
+        Write-Host "Checking if archive exists in storage..."
+        $exists = az storage blob exists --account-name "devrwdinfsa1401" --container-name "dependency-check" --name "dependency-check-data.tar.gz" --auth-mode login --query "exists" -o tsv
+
+        if ($exists -eq "true") {
+          Write-Host "Archive exists. Downloading..."
+          az storage blob download --account-name "devrwdinfsa1401" --container-name "dependency-check" --name "dependency-check-data.tar.gz" --file "dependency-check-data.tar.gz" --auth-mode login
+          Write-Host "Download complete."
+        }
+        else {
+          Write-Host "Archive does not exist. Starting from empty data directory."
+        }
+
+  - task: PowerShell@2
+    displayName: Extract existing DB
+    inputs:
+      targetType: inline
+      script: |
+        if (Test-Path "dependency-check-data.tar.gz") {
+          tar -xzf "dependency-check-data.tar.gz" -C "dependency-check-data"
+          Write-Host "Existing archive extracted."
+        }
+        else {
+          Write-Host "Skipping extract because archive does not exist."
+        }
+
+        Write-Host "Current data directory contents:"
+        Get-ChildItem -Path "dependency-check-data" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 20
       
   - bash: |
       if [ -f "$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/${{parameters.projectFolder}}/package.json" ]; then
@@ -85,15 +101,19 @@ steps:
     displayName: 'Pull OWASP Image'
     
   - script: |
-      docker run --rm -v $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}:/workspace owasp/dependency-check-action:latest \
-                 --nvdApiKey $(OwaspNVDKey) \
-                 --project ${{parameters.projectFolder}} \
-                 --scan /workspace \
-                 --exclude '**/*Tests.csproj' \
-                 --format HTML --format JUNIT \
-                 --ossIndexUsername $(OwaspNVDOssUsername) \
-                 --ossIndexPassword $(OwaspNVDOssPassword) \
-                 --out /workspace
+      docker run --rm \
+        -v $(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}:/workspace \
+        -v $(System.DefaultWorkingDirectory)/dependency-check-data:/usr/share/dependency-check/data \
+        owasp/dependency-check-action:latest \
+        --nvdApiKey $(OwaspNVDKey) \
+        --project ${{parameters.projectFolder}} \
+        --scan /workspace \
+        --exclude '**/*Tests.csproj' \
+        --format HTML --format JUNIT \
+        --ossIndexUsername $(OwaspNVDOssUsername) \
+        --ossIndexPassword $(OwaspNVDOssPassword) \
+        --out /workspace \
+        --noupdate
     displayName: 'Run dependency check'
     
   - task: PublishTestResults@2
@@ -109,8 +129,3 @@ steps:
       artifact: $(System.JobAttempt)-owasp-report
       publishLocation: 'pipeline'
     displayName: 'Publish OWASP Artifact'
-  
-  # Not needed, probably given the short lifetime of agent, left commented out in case of future need:
-  #- script: |
-  #    docker image rm owasp/dependency-check-action:latest
-  #  displayName: 'Remove OWASP Image'
