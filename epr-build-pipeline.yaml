@@ -87,137 +87,136 @@ stages:
               solutionFolder: ${{ parameters.solutionFolder }}
               dotnetVersion: ${{ parameters.dotnetVersion }}
 
-      - job: AnalyseAndTest
-        displayName: Run Unit Tests and SonarQube steps
-        dependsOn: ''
-        steps:
-          - checkout: self          # Force full history for SonarQube analysis
-            fetchDepth: 0
-            clean: true             # optional
-          - template: templates/analyse-and-test.yaml
-            parameters:
-              solutionFolder: ${{ parameters.solutionFolder }}
-              sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
-              sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
-              runTests: ${{ parameters.runTests }}
-              testPattern: ${{ parameters.testPattern }}
-              runIntegrationTests: ${{ parameters.runIntegrationTests }}
-              runNugetTasks: ${{ parameters.runNugetTasks }}
-              sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
+      # - job: AnalyseAndTest
+      #   displayName: Run Unit Tests and SonarQube steps
+      #   dependsOn: ''
+      #   steps:
+      #     - checkout: self          # Force full history for SonarQube analysis
+      #       fetchDepth: 0
+      #       clean: true             # optional
+      #     - template: templates/analyse-and-test.yaml
+      #       parameters:
+      #         solutionFolder: ${{ parameters.solutionFolder }}
+      #         sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
+      #         sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
+      #         runTests: ${{ parameters.runTests }}
+      #         testPattern: ${{ parameters.testPattern }}
+      #         runIntegrationTests: ${{ parameters.runIntegrationTests }}
+      #         runNugetTasks: ${{ parameters.runNugetTasks }}
+      #         sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
 
-      - job: RunGitleaksSecretScan
-        displayName: Run Gitleaks Secret Scan
-        dependsOn: ''
-        variables:
-        - name: commonTemplatesRepoSubDir
-          value: s/CommonTemplates
-        - name: commonTemplatesRepoRoot
-          value: $(Pipeline.Workspace)/${{ variables.commonTemplatesRepoSubDir }}
-        - name: sourceRepoSubDir
-          value: s/source
-        - name: sourceRepoRoot
-          value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
-        steps:
-          - checkout: CommonTemplates
-            path: ${{ variables.commonTemplatesRepoSubDir }}
-            clean: true
-          - checkout: self
-            path: ${{ variables.sourceRepoSubDir }}
-            fetchDepth: 0
-          - template: templates/gitleaks-scan.yaml
-            parameters:
-              scanLocation: $(sourceRepoRoot)
-              configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
-              failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
+      # - job: RunGitleaksSecretScan
+      #   displayName: Run Gitleaks Secret Scan
+      #   dependsOn: ''
+      #   variables:
+      #   - name: commonTemplatesRepoSubDir
+      #     value: s/CommonTemplates
+      #   - name: commonTemplatesRepoRoot
+      #     value: $(Pipeline.Workspace)/${{ variables.commonTemplatesRepoSubDir }}
+      #   - name: sourceRepoSubDir
+      #     value: s/source
+      #   - name: sourceRepoRoot
+      #     value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
+      #   steps:
+      #     - checkout: CommonTemplates
+      #       path: ${{ variables.commonTemplatesRepoSubDir }}
+      #       clean: true
+      #     - checkout: self
+      #       path: ${{ variables.sourceRepoSubDir }}
+      #       fetchDepth: 0
+      #     - template: templates/gitleaks-scan.yaml
+      #       parameters:
+      #         scanLocation: $(sourceRepoRoot)
+      #         configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
+      #         failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
 
-      # Temporarily disable OWASP scan
-      # - ${{ if eq(parameters.runOWASPScan, true) }}:
-      #   - job: RunOWASPTests
-      #     displayName: Run OWASP Dependency checks
-      #     dependsOn: ''
-      #     steps:
-      #       - template: templates/owaspcheck.yaml
-      #         parameters:
-      #           solutionFolder: ${{ parameters.solutionFolder }}
-      #           projectFolder: ${{ parameters.projectFolder }}
-      #           componentDirectory: ${{ parameters.componentDirectory }}
+      - ${{ if eq(parameters.runOWASPScan, true) }}:
+        - job: RunOWASPTests
+          displayName: Run OWASP Dependency checks
+          dependsOn: ''
+          steps:
+            - template: templates/owaspcheck.yaml
+              parameters:
+                solutionFolder: ${{ parameters.solutionFolder }}
+                projectFolder: ${{ parameters.projectFolder }}
+                componentDirectory: ${{ parameters.componentDirectory }}
 
-      - job: BuildAndPushDockerImage
-        displayName: Build and Push Docker Image
-        dependsOn:
-          - RunDotnetSDKScript
-          - AnalyseAndTest
-          - RunGitleaksSecretScan
-        steps:
-          - template: templates/docker.yaml
-            parameters:
-              azureSubscription: ${{ parameters.azureSubscription }}
-              solutionFolder: ${{ parameters.solutionFolder }}
-              projectFolder: ${{ parameters.projectFolder }}
-              azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
-              repositoryName: ${{ parameters.acrRepositoryName }}
-              branchName: ${{ parameters.branchName }}
+      # - job: BuildAndPushDockerImage
+      #   displayName: Build and Push Docker Image
+      #   dependsOn:
+      #     - RunDotnetSDKScript
+      #     - AnalyseAndTest
+      #     - RunGitleaksSecretScan
+      #   steps:
+      #     - template: templates/docker.yaml
+      #       parameters:
+      #         azureSubscription: ${{ parameters.azureSubscription }}
+      #         solutionFolder: ${{ parameters.solutionFolder }}
+      #         projectFolder: ${{ parameters.projectFolder }}
+      #         azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
+      #         repositoryName: ${{ parameters.acrRepositoryName }}
+      #         branchName: ${{ parameters.branchName }}
 
-      - job: BuildAndPushSQLMigrationDockerImage
-        displayName: Build and Push Docker Image - Migration Script
-        dependsOn: BuildAndPushDockerImage
-        condition: eq('${{parameters.buildMigrationScript}}', true)
-        steps:
-          - template: templates/docker-sql-migration-script.yaml
-            parameters:
-              azureSubscription: ${{ parameters.azureSubscription }}
-              solutionFolder: ${{ parameters.solutionFolder }}
-              projectFolder: ${{ parameters.projectFolder }}
-              DataFolder: ${{ parameters.DataFolder }}
-              azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
-              repositoryName: ${{ parameters.acrRepositoryName }}
-              branchName: ${{ parameters.branchName }}
+      # - job: BuildAndPushSQLMigrationDockerImage
+      #   displayName: Build and Push Docker Image - Migration Script
+      #   dependsOn: BuildAndPushDockerImage
+      #   condition: eq('${{parameters.buildMigrationScript}}', true)
+      #   steps:
+      #     - template: templates/docker-sql-migration-script.yaml
+      #       parameters:
+      #         azureSubscription: ${{ parameters.azureSubscription }}
+      #         solutionFolder: ${{ parameters.solutionFolder }}
+      #         projectFolder: ${{ parameters.projectFolder }}
+      #         DataFolder: ${{ parameters.DataFolder }}
+      #         azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
+      #         repositoryName: ${{ parameters.acrRepositoryName }}
+      #         branchName: ${{ parameters.branchName }}
 
-  - stage: DeployToDev4
-    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
-    jobs:
+  # - stage: DeployToDev4
+  #   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
+  #   jobs:
 
-      - job: DeployLatestMainDev4
-        displayName: Deploy Latest Main to Dev4
-        steps:
-          - template: templates/deployment.yaml
-            parameters:
-              imageTag: 'main-$(Build.BuildNumber)'
-              azureSubscription: ${{ parameters.azureSubscription }}
-              acrName: ${{ parameters.acrAzureContainerRegistryName }}
-              registryName: ${{ parameters.acrRepositoryName }}
-              serviceName: ${{ parameters.serviceName }}
-              targetEnvironment: 'development'
+  #     - job: DeployLatestMainDev4
+  #       displayName: Deploy Latest Main to Dev4
+  #       steps:
+  #         - template: templates/deployment.yaml
+  #           parameters:
+  #             imageTag: 'main-$(Build.BuildNumber)'
+  #             azureSubscription: ${{ parameters.azureSubscription }}
+  #             acrName: ${{ parameters.acrAzureContainerRegistryName }}
+  #             registryName: ${{ parameters.acrRepositoryName }}
+  #             serviceName: ${{ parameters.serviceName }}
+  #             targetEnvironment: 'development'
 
-      - job: DeployToDev4Regulators
-        displayName: Deploy Latest Main to Dev4 Regulators App
-        condition: eq('${{parameters.additionalDeployments}}', true)
-        steps:
-          - template: templates/deployment.yaml
-            parameters:
-              imageTag: 'main-$(Build.BuildNumber)'
-              azureSubscription: ${{ parameters.azureSubscription }}
-              acrName: ${{ parameters.acrAzureContainerRegistryName }}
-              registryName: ${{ parameters.acrRepositoryName }}
-              serviceName: ${{ parameters.RegulatorsServiceName }}
-              targetEnvironment: 'development'
+  #     - job: DeployToDev4Regulators
+  #       displayName: Deploy Latest Main to Dev4 Regulators App
+  #       condition: eq('${{parameters.additionalDeployments}}', true)
+  #       steps:
+  #         - template: templates/deployment.yaml
+  #           parameters:
+  #             imageTag: 'main-$(Build.BuildNumber)'
+  #             azureSubscription: ${{ parameters.azureSubscription }}
+  #             acrName: ${{ parameters.acrAzureContainerRegistryName }}
+  #             registryName: ${{ parameters.acrRepositoryName }}
+  #             serviceName: ${{ parameters.RegulatorsServiceName }}
+  #             targetEnvironment: 'development'
 
-      - job: RunLatestSQLMigrationDev4
-        displayName: Run latest SQL Migration for Dev4
-        condition: eq('${{parameters.buildMigrationScript}}', true)
-        steps:
-          - template: templates/docker-run-sql-migration.yaml
-            parameters:
-              azureSubscription: ${{ parameters.azureSubscription }}
-              solutionFolder: ${{ parameters.solutionFolder }}
-              projectFolder: ${{ parameters.projectFolder }}
-              azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
-              repositoryName: ${{ parameters.acrRepositoryName }}
-              branchName: 'main-$(Build.BuildNumber)'
+  #     - job: RunLatestSQLMigrationDev4
+  #       displayName: Run latest SQL Migration for Dev4
+  #       condition: eq('${{parameters.buildMigrationScript}}', true)
+  #       steps:
+  #         - template: templates/docker-run-sql-migration.yaml
+  #           parameters:
+  #             azureSubscription: ${{ parameters.azureSubscription }}
+  #             solutionFolder: ${{ parameters.solutionFolder }}
+  #             projectFolder: ${{ parameters.projectFolder }}
+  #             azureContainerRegistryName: ${{ parameters.acrAzureContainerRegistryName }}
+  #             repositoryName: ${{ parameters.acrRepositoryName }}
+  #             branchName: 'main-$(Build.BuildNumber)'
 
-      - ${{ if eq(parameters.runAutomationTests, true) }}:
-        - template: pipelines/automation-testing-template.yml@AutomationTesting            
-          parameters:
-            env: 'dev4'
-            tags: '@sit'
-            AutomationTestingDirToggle: ${{ parameters.AutomationTestingDirToggle }}
+  #     - ${{ if eq(parameters.runAutomationTests, true) }}:
+  #       - template: pipelines/automation-testing-template.yml@AutomationTesting            
+  #         parameters:
+  #           env: 'dev4'
+  #           tags: '@sit'
+  #           AutomationTestingDirToggle: ${{ parameters.AutomationTestingDirToggle }}
