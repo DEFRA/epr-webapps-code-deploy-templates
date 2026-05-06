@@ -24,23 +24,25 @@ parameters:
 - name: pool
   type: string
   default: ''
+- name: envToDeploy
+  type: string
+  default: ''
 
 
 jobs:
 - deployment: 'DeployAppCode'
   environment: ${{ parameters.targetEnvironment }}
-  ${{ if or(contains(lower(parameters.targetEnvironment), 'pre'), contains(lower(parameters.targetEnvironment), 'prd')) }}:
-    pool:
+  pool:
+    ${{ if or(contains(lower(parameters.envToDeploy), 'pre'), contains(lower(parameters.envToDeploy), 'prod')) }}:
       ${{ if eq(lower(parameters.poolOS), 'windows') }}:
         name: DEFRA-COMMON-WINDOWS-SSV5
       ${{ else }}:
         name: DEFRA-COMMON-UBUNTU-SSV5
-  ${{ elseif ne(parameters.pool, '') }}:
-    pool:
-      name: ${{ parameters.pool }}
-  ${{ else }}:
-    pool:
-      name: DEFRA-COMMON-UBUNTU-SSV3
+    ${{ else }}:
+      ${{ if ne(parameters.pool, '') }}:
+        name: ${{ parameters.pool }}
+      ${{ else }}:
+        name: DEFRA-COMMON-UBUNTU-SSV3
   strategy:
     runOnce:
       deploy:
