@@ -5,10 +5,10 @@
   - name: projectFolder
     type: string
     default: ''
-  - name: dev1StorageAccount
+  - name: dependencyDataContainer
     type: string
     default: ''
-  - name: storageAccountContainer
+  - name: dependencyDataStorageAccount
     type: string
     default: ''
 
@@ -17,8 +17,8 @@ steps:
       echo 'Working Folder: $(System.DefaultWorkingDirectory)'
       echo 'Solution Folder: ${{parameters.solutionFolder}}'
       echo 'Project Folder: ${{parameters.projectFolder}}'
-      echo 'Dev1 Storage Account: ${{parameters.dev1StorageAccount}}'
-      echo 'Storage Account Container: ${{parameters.storageAccountContainer}}'
+      echo 'Dependency Data Container: ${{parameters.dependencyDataContainer}}'
+      echo 'Dependency Data Storage Account: ${{parameters.dependencyDataStorageAccount}}'
     displayName: Debug Input Parameters
         
   - task: DockerInstaller@0
@@ -64,11 +64,11 @@ steps:
       scriptLocation: inlineScript
       inlineScript: |
         Write-Host "Checking if archive exists in storage..."
-        $exists = az storage blob exists --account-name "${{parameters.dev1StorageAccount}}" --container-name "${{parameters.storageAccountContainer}}" --name "dependency-check-data.tar.gz" --auth-mode login --query "exists" -o tsv
+        $exists = az storage blob exists --account-name "${{parameters.dependencyDataStorageAccount}}" --container-name "${{parameters.dependencyDataContainer}}" --name "dependency-check-data.tar.gz" --auth-mode login --query "exists" -o tsv
 
         if ($exists -eq "true") {
           Write-Host "Archive exists. Downloading..."
-          az storage blob download --account-name "${{parameters.dev1StorageAccount}}" --container-name "${{parameters.storageAccountContainer}}" --name "dependency-check-data.tar.gz" --file "dependency-check-data.tar.gz" --auth-mode login
+          az storage blob download --account-name "${{parameters.dependencyDataStorageAccount}}" --container-name "${{parameters.dependencyDataContainer}}" --name "dependency-check-data.tar.gz" --file "dependency-check-data.tar.gz" --auth-mode login
           Write-Host "Download complete."
         }
         else {

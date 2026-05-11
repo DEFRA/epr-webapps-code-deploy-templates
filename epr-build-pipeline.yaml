@@ -63,12 +63,12 @@ parameters:
 - name: AutomationTestingDirToggle
   type: boolean
   default: true
-- name: dev1StorageAccount
-  type: string
-  default: 'devrwdinfsa1401'
-- name: storageAccountContainer
+- name: dependencyDataContainer
   type: string
   default: 'dependency-check'
+- name: dependencyDataStorageAccount
+  type: string
+  default: 'devrwdinfsa1401'
 
 resources:
   repositories:
@@ -140,10 +140,10 @@ stages:
           steps:
             - template: templates/owaspcheck.yaml
               parameters:
-                dev1StorageAccount: ${{ parameters.dev1StorageAccount }}
+                dependencyDataStorageAccount: ${{ parameters.dependencyDataStorageAccount }}
                 projectFolder: ${{ parameters.projectFolder }}
                 solutionFolder: ${{ parameters.solutionFolder }}
-                storageAccountContainer: ${{ parameters.storageAccountContainer }}
+                dependencyDataContainer: ${{ parameters.dependencyDataContainer }}
 
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
