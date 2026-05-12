@@ -34,7 +34,7 @@ steps:
     displayName: 'SonarQube Upgraded Prepare'
     inputs:
       SonarQube: '${{parameters.sonarqubeInstance}}'
-      scannerMode: 'MSBuild'
+      scannerMode: dotnet
       projectKey: '${{parameters.sonarQubeProjectKey}}'
       projectName: '${{parameters.sonarQubeProjectName}}'
       extraProperties: sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
