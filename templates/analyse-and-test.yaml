@@ -30,7 +30,7 @@ parameters:
 
 
 steps:
-  - task: SonarQubePrepare@6
+  - task: SonarQubePrepare@8
     displayName: 'SonarQube Upgraded Prepare'
     inputs:
       SonarQube: '${{parameters.sonarqubeInstance}}'
@@ -114,12 +114,12 @@ steps:
           echo "No compose.yml file found, skipping"
         fi
 
-  - task: SonarQubeAnalyze@6
+  - task: SonarQubeAnalyze@8
     displayName: 'SonarQube Upgraded Analyse'
     inputs:
       jdkversion: 'JAVA_HOME_17_X64'
 
-  - task: SonarQubePublish@6
+  - task: SonarQubePublish@8
     displayName: 'SonarQube Upgraded Publish'
     retryCountOnTaskFailure: 5
     inputs:
