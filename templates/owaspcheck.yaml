@@ -147,12 +147,12 @@ steps:
         docker run --rm \
           -v "$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}:/src" \
           ghcr.io/google/osv-scanner:v2.3.6 \
-          scan source --recursive --format=sarif --output=/src/osv-results.sarif /src || true
+          scan source --recursive --format=html --output=/src/osv-results.html /src || true
 
   - task: PublishPipelineArtifact@1
     displayName: 'Publish OSV Scan Results'
     condition: succeededOrFailed()
     inputs:
-      targetPath: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/osv-results.sarif'
+      targetPath: '$(System.DefaultWorkingDirectory)/${{parameters.solutionFolder}}/osv-results.html'
       artifact: $(System.JobAttempt)-osv-report
       publishLocation: 'pipeline'
