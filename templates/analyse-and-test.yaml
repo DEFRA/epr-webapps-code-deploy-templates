@@ -102,6 +102,7 @@ steps:
         projects:  |
           ${{ parameters.testFolder}}/**/*.csproj
       arguments: '--configuration $(buildConfiguration) --filter "Category=IntegrationTest" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./integration-tests-coverage/coverage.opencover.xml'
+      publishTestResults: true
 
   - task: CmdLine@2
     displayName: 'Stop Docker Compose'
