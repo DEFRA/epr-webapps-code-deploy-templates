@@ -18,6 +18,9 @@ parameters:
   - name: testProjectFolder
     type: string
     default: ''
+  - name: buildConfiguration
+    type: string
+    default: 'Release'
 
 steps:
   - script: |
@@ -54,6 +57,7 @@ steps:
       command: build
       # projects: '**/*[Uu]nit[Tt]ests/*.csproj'
       projects: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'
       publishTestResults: true
 
   - task: SonarQubeAnalyze@5
@@ -71,4 +75,4 @@ steps:
       command: test
       # projects: '**/*[Uu]nit[Tt]ests/*.csproj'
       projects: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
-      arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutput=$(Agent.TempDirectory)/ /p:CoverletOutputFormat=opencover'
+      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:CollectCoverage=true /p:CoverletOutput=$(Agent.TempDirectory)/ /p:CoverletOutputFormat=opencover'
