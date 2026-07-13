@@ -57,7 +57,7 @@ steps:
       command: build
       # projects: '**/*[Uu]nit[Tt]ests/*.csproj'
       projects: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
-      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:AzureBuild=true'
       publishTestResults: true
 
   - task: SonarQubeAnalyze@5
@@ -75,4 +75,4 @@ steps:
       command: test
       # projects: '**/*[Uu]nit[Tt]ests/*.csproj'
       projects: '${{parameters.solutionFolder}}/${{parameters.componentDirectory}}/${{parameters.testProjectFolder}}/${{parameters.testProjectFolder}}.csproj'
-      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:CollectCoverage=true /p:CoverletOutput=$(Agent.TempDirectory)/ /p:CoverletOutputFormat=opencover'
+      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:AzureBuild=true /p:CollectCoverage=true /p:CoverletOutput=$(Agent.TempDirectory)/ /p:CoverletOutputFormat=opencover'

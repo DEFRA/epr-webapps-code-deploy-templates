@@ -66,7 +66,7 @@ steps:
         projects: '**/*.csproj'
       ${{else}}:
         projects: ${{ parameters.projectFolder }}/*.csproj
-      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:AzureBuild=true'
 
   - task: DotNetCoreCLI@2
     displayName: 'Run Unit Tests'
@@ -79,7 +79,7 @@ steps:
       ${{else}}:
         projects:  |
           ${{ parameters.testPattern}}
-      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./unit-tests-coverage/coverage.opencover.xml'
+      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:AzureBuild=true /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./unit-tests-coverage/coverage.opencover.xml'
       publishTestResults: true
 
   - task: CmdLine@2
@@ -105,7 +105,7 @@ steps:
       ${{else}}:
         projects:  |
           ${{ parameters.testFolder}}/**/*.csproj
-      arguments: '--configuration ${{ parameters.buildConfiguration }} --filter "Category=IntegrationTest|TestCategory=IntegrationTest" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./integration-tests-coverage/coverage.opencover.xml'
+      arguments: '--configuration ${{ parameters.buildConfiguration }} /p:AzureBuild=true --filter "Category=IntegrationTest|TestCategory=IntegrationTest" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./integration-tests-coverage/coverage.opencover.xml'
 
   - task: CmdLine@2
     displayName: 'Stop Docker Compose'
