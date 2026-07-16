@@ -69,6 +69,9 @@ parameters:
 - name: dependencyDataStorageAccount
   type: string
   default: 'devrwdinfsa1401'
+- name: buildConfiguration
+  type: string
+  default: 'Release'
 
 resources:
   repositories:
@@ -109,6 +112,7 @@ stages:
               runIntegrationTests: ${{ parameters.runIntegrationTests }}
               runNugetTasks: ${{ parameters.runNugetTasks }}
               sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
+              buildConfiguration: ${{ parameters.buildConfiguration }}
 
       - job: RunGitleaksSecretScan
         displayName: Run Gitleaks Secret Scan
