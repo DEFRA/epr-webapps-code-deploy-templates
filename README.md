@@ -2,6 +2,10 @@
 
 This repository hosts the common templates used in other repositories for EPR - RPD.
 
+## History
+
+This GitHub repository was refreshed from the original https://dev.azure.com/defragovuk/RWD-CPR-EPR4P-ADO/_git/epr-app-config-settings repository after a migration wasn't completely cleanly. See https://github.com/DEFRA/epr-webapps-code-deploy-templates/pull/39.
+
 ## Usage
 
 The templates hosted here are not intended to be used on their own, but to be extended by or included in other Azure pipelines. See [Azure documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops&pivots=templates-includes) for the how-to.

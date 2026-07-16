@@ -82,6 +82,11 @@ steps:
           Write-Error "Unknown Service Type"
           exit 1
         }
+
+  - template: get-current-dockertag.yaml
+    parameters:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      serviceName: ${{ upper(parameters.serviceName) }}
   
   - task: AzureKeyVault@2
     condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
