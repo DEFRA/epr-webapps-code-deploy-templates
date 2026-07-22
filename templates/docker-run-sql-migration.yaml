@@ -77,7 +77,7 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        set -e  # Exit immediately on error
+        set -eo pipefail  # Exit on error; propagate exit code through pipes
         docker images
 
         docker run --rm \
@@ -86,12 +86,7 @@ steps:
           -e USER='$(sqladminu)' \
           -e PASSWORD='$(sqladminp)' \
           -e DATABASE='$(sqlDB)' \
-          '${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.branchName}}-database-migrations' | tee migration_output.log
+          '${{parameters.azureContainerRegistryName}}.azurecr.io/${{parameters.repositoryName}}:${{parameters.branchName}}-database-migrations'
 
-        # Check for common SQL errors including invalid cursor state
-        if grep -Ei 'error|invalid cursor state|sqlstate 24000' migration_output.log; then
-          echo 'Migration process failed due to SQL error.'
-          exit 1
-        fi
 
         echo 'Migration completed successfully.'
