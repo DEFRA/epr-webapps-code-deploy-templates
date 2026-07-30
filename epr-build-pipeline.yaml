@@ -36,6 +36,9 @@ parameters:
 - name: buildMigrationScript
   type: boolean
   default: false
+- name: runOWASPScan
+  type: boolean
+  default: false
 - name: gitleaksFailOnSecretDetection
   type: boolean
   default: true
