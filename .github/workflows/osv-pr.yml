@@ -1,0 +1,27 @@
+name: OSV wrapper (PR)
+on:
+  workflow_call:
+    inputs:
+      fail-on-vuln:
+        type: boolean
+        default: false        # non-blocking for now
+      upload-sarif:
+        type: boolean
+        default: true
+      scan-args:
+        type: string
+        default: |-
+          --recursive
+          ./
+jobs:
+  scan:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@9a498708959aeaef5ef730655706c5a1df1edbc2 # gh api repos/google/osv-scanner-action/git/ref/tags/v2.3.8 --jq '.object.sha'
+    with:
+      fail-on-vuln: ${{ inputs.fail-on-vuln }}
+      upload-sarif: ${{ inputs.upload-sarif }}
+      scan-args:    ${{ inputs.scan-args }}
+    

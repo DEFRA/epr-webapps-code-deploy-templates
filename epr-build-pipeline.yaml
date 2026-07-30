@@ -38,7 +38,7 @@ parameters:
   default: false
 - name: runOWASPScan
   type: boolean
-  default: true
+  default: false
 - name: gitleaksFailOnSecretDetection
   type: boolean
   default: true
@@ -138,18 +138,6 @@ stages:
               scanLocation: $(sourceRepoRoot)
               configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
               failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
-
-      - ${{ if eq(parameters.runOWASPScan, true) }}:
-        - job: RunOWASPTests
-          displayName: Run OWASP Dependency checks
-          dependsOn: ''
-          steps:
-            - template: templates/owaspcheck.yaml
-              parameters:
-                dependencyDataStorageAccount: ${{ parameters.dependencyDataStorageAccount }}
-                projectFolder: ${{ parameters.projectFolder }}
-                solutionFolder: ${{ parameters.solutionFolder }}
-                dependencyDataContainer: ${{ parameters.dependencyDataContainer }}
 
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image

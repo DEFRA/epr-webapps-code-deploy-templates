@@ -4,16 +4,8 @@ parameters:
   default: false
 
 stages:
-  - stage: doingOWASPandDockerBuild
+  - stage: doingDockerBuild
     jobs:
-
-    - job: RunOWASPTests
-      displayName: Run OWASP Dependency checks
-      steps:
-        - template: templates/owaspcheck.yaml
-          parameters:
-            solutionFolder: $(solutionFolder)
-            projectFolder: $(testProjectFolder)
 
     - job: BuildAndPushDockerImage
       displayName: Build and Push Docker Image
