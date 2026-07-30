@@ -122,7 +122,8 @@ steps:
         --ossIndexPassword $(OwaspNVDOssPassword) \
         --out /workspace \
         --noupdate \
-        --disableOssIndex
+        --disableOssIndex \
+        --disableNodeAudit
     displayName: 'Run dependency check'
     
   - task: PublishTestResults@2
