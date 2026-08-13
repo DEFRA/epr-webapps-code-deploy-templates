@@ -10,18 +10,37 @@ on:
         default: true
       scan-args:
         type: string
-        default: |-
-          --recursive
-          ./
+        default: "--recursive ./"
 jobs:
   scan:
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       security-events: write
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@9a498708959aeaef5ef730655706c5a1df1edbc2 # gh api repos/google/osv-scanner-action/git/ref/tags/v2.3.8 --jq '.object.sha'
-    with:
-      fail-on-vuln: ${{ inputs.fail-on-vuln }}
-      upload-sarif: ${{ inputs.upload-sarif }}
-      scan-args:    ${{ inputs.scan-args }}
-    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Run OSV-Scanner
+        continue-on-error: ${{ !inputs.fail-on-vuln }}
+        uses: google/osv-scanner-action/osv-scanner-action@9a498708959aeaef5ef730655706c5a1df1edbc2 # v2.3.8
+        with:
+          scan-args: |-
+            --format=sarif
+            --output=results.sarif
+            ${{ inputs.scan-args }}
+
+      - name: Upload SARIF to code scanning
+        if: ${{ inputs.upload-sarif && always() }}
+        uses: github/codeql-action/upload-sarif@4e828ff8d448a8a6e532957b1811f387a63867e8 # v4.30.9
+        with:
+          sarif_file: results.sarif
+
+      - name: Upload SARIF artefact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: osv-results-pr
+          path: results.sarif
+          if-no-files-found: warn
