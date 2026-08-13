@@ -33,13 +33,13 @@ jobs:
 
       - name: Upload SARIF to code scanning
         if: ${{ inputs.upload-sarif && always() }}
-        uses: github/codeql-action/upload-sarif@4e828ff8d448a8a6e532957b1811f387a63867e8 # v4.30.9
+        uses: github/codeql-action/upload-sarif@24c7eb380a2dc368f2d129e4c65e51d172983a1e # v4.30.9
         with:
           sarif_file: results.sarif
 
       - name: Upload SARIF artefact
         if: ${{ always() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4.6.2
         with:
           name: osv-results-pr
           path: results.sarif
