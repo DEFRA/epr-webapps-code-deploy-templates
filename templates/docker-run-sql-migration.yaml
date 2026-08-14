@@ -77,7 +77,7 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        set -e  # Exit immediately on error
+        set -euo pipefail  # Exit on errors, unset variables, and pipeline failures
         docker images
 
         docker run --rm \
