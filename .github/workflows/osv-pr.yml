@@ -15,7 +15,7 @@ on:
           ./
       sarif-category:
         type: string
-        default: osv-scanner-pr
+        default: osv-scanner-full
 jobs:
   scan:
     runs-on: ubuntu-latest
