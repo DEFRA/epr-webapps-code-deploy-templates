@@ -54,7 +54,7 @@ steps:
       ${{ if eq(parameters.projectFolder, '') }}:
         projects: '**/*.sln'
       ${{else}}:
-        projects: ${{ parameters.projectFolder }}/*.csproj
+        projects: ${{ parameters.solutionFolder }}/${{ parameters.projectFolder }}/*.csproj
       feedsToUse: 'config'
       nugetConfigPath: '${{parameters.solutionFolder}}/NuGet.Config'
 
@@ -65,7 +65,7 @@ steps:
       ${{ if eq(parameters.projectFolder, '') }}:
         projects: '**/*.csproj'
       ${{else}}:
-        projects: ${{ parameters.projectFolder }}/*.csproj
+        projects: ${{ parameters.solutionFolder }}/${{ parameters.projectFolder }}/*.csproj
       arguments: '--configuration ${{ parameters.buildConfiguration }} /p:AzureBuild=true'
 
   - task: DotNetCoreCLI@2
@@ -174,7 +174,7 @@ steps:
               "Accept" = "application/json"
             };
             $instanceUrlPart = "vss-sonarqube-test.azure.defra.cloud"
-          }                    
+          }
           "SonarQubeLatest" {
             $sonarQubeApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$(EPRADO-SonarQubeToken):"))
             $headers = @{
