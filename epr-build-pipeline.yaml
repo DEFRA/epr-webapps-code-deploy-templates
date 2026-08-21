@@ -105,6 +105,7 @@ stages:
           - template: templates/analyse-and-test.yaml
             parameters:
               solutionFolder: ${{ parameters.solutionFolder }}
+              projectFolder: ${{ parameters.projectFolder }}
               sonarQubeProjectKey: ${{ parameters.sonarQubeProjectKey }}
               sonarQubeProjectName: ${{ parameters.sonarQubeProjectName }}
               runTests: ${{ parameters.runTests }}
@@ -213,7 +214,7 @@ stages:
               branchName: 'main-$(Build.BuildNumber)'
 
       - ${{ if eq(parameters.runAutomationTests, true) }}:
-        - template: pipelines/automation-testing-template.yml@AutomationTesting            
+        - template: pipelines/automation-testing-template.yml@AutomationTesting
           parameters:
             env: 'dev4'
             tags: '@sit'
