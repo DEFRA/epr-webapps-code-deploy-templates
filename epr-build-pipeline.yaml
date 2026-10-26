@@ -42,6 +42,9 @@ parameters:
 - name: gitleaksFailOnSecretDetection
   type: boolean
   default: true
+- name: failOnNonAsciiPackageId
+  type: boolean
+  default: true
 - name: serviceName
   type: string
   default: ''
@@ -140,12 +143,24 @@ stages:
               configPath: $(commonTemplatesRepoRoot)/configuration/gitleaks.toml
               failOnSecretDetection: ${{ parameters.gitleaksFailOnSecretDetection }}
 
+      - job: CheckNuGetPackageIds
+        displayName: Check NuGet Package IDs
+        dependsOn: ''
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - template: templates/nuget-package-id-check.yaml
+            parameters:
+              scanLocation: $(Build.SourcesDirectory)
+              failOnNonAsciiPackageId: ${{ parameters.failOnNonAsciiPackageId }}
+
       - job: BuildAndPushDockerImage
         displayName: Build and Push Docker Image
         dependsOn:
           - RunDotnetSDKScript
           - AnalyseAndTest
           - RunGitleaksSecretScan
+          - CheckNuGetPackageIds
         steps:
           - template: templates/docker.yaml
             parameters:

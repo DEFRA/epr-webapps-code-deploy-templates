@@ -1,0 +1,87 @@
+# Fails the build when a NuGet package ID in the repository contains non-ASCII characters.
+#
+# A package ID such as "AutоFiхture.MSTеst" (Cyrillic о, х, е) looks identical to the real
+# "AutoFixture.MSTest" in code review and in text search, so it can hide a look-alike package.
+# Package IDs are plain ASCII, so any non-ASCII character in one is treated as an error.
+#
+# Only the package ID itself is checked (not comments, descriptions or copyright text) in:
+#   *.csproj, *.fsproj, *.vbproj, *.props, *.targets   PackageReference / PackageVersion / PackageDownload /
+#                                                      GlobalPackageReference / DotNetCliToolReference
+#                                                      (Include, Update and Remove attributes)
+#   packages.config                                    <package id="...">
+#   NuGet.Config                                       <package pattern="..."> (package source mapping)
+#   packages.lock.json, dotnet-tools.json              property names (package IDs; \uXXXX escapes are decoded)
+parameters:
+  - name: scanLocation
+    type: string
+  - name: failOnNonAsciiPackageId
+    type: boolean
+    default: true
+
+steps:
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      [string]$scanLocation = $env:SCAN_LOCATION
+      [bool]$failOnNonAscii = [System.Convert]::ToBoolean($env:FAIL_ON_NON_ASCII)
+      Write-Host "Scanning $scanLocation for non-ASCII NuGet package IDs (failOnNonAsciiPackageId=$failOnNonAscii)"
+
+      [string]$fileNamePattern = '(?i)(\.(cs|fs|vb)proj|\.props|\.targets)$|^(packages\.config|nuget\.config|packages\.lock\.json|dotnet-tools\.json)$'
+      [string]$excludedDirectoryPattern = '[\\/](\.git|bin|obj|node_modules)[\\/]'
+      [string]$packageElements = 'PackageReference|PackageVersion|PackageDownload|GlobalPackageReference|DotNetCliToolReference'
+      [string]$jsonPropertyName = '"((?:[^"\\]|\\.)*)"\s*:'
+
+      # file name pattern -> regex whose capture groups hold package IDs
+      $rules = @(
+        @{ Files = '(?i)\.(cs|fs|vb)proj$|\.props$|\.targets$'; Pattern = "(?is)<(?:$packageElements)\b[^>]*?\b(?:Include|Update|Remove)\s*=\s*(?:`"([^`"]*)`"|'([^']*)')" },
+        @{ Files = '(?i)^packages\.config$';                    Pattern = '(?is)<package\b[^>]*?\bid\s*=\s*(?:"([^"]*)"|''([^'']*)'')' },
+        @{ Files = '(?i)^nuget\.config$';                       Pattern = '(?is)<package\b[^>]*?\bpattern\s*=\s*(?:"([^"]*)"|''([^'']*)'')' },
+        @{ Files = '(?i)^(packages\.lock|dotnet-tools)\.json$'; Pattern = $jsonPropertyName; Json = $true }
+      )
+
+      function ConvertTo-VisibleId([string]$id) {
+        # Show every non-ASCII character as <U+XXXX> so the hidden character is obvious in the log.
+        return [regex]::Replace($id, '[^\x00-\x7F]', { param($m) '<U+{0:X4}>' -f [int][char]$m.Value })
+      }
+
+      [string]$root = (Resolve-Path -LiteralPath $scanLocation).Path
+      $files = @(Get-ChildItem -LiteralPath $root -Recurse -File -Force |
+        Where-Object { $_.FullName -notmatch $excludedDirectoryPattern -and $_.Name -match $fileNamePattern })
+      Write-Host "Found $($files.Count) project, props, targets, lock and config files to check"
+
+      [int]$violations = 0
+      foreach ($file in $files) {
+        $text = [System.IO.File]::ReadAllText($file.FullName)
+        $relative = $file.FullName.Substring($root.Length).TrimStart('\', '/')
+        foreach ($rule in $rules) {
+          if ($file.Name -notmatch $rule.Files) { continue }
+          foreach ($match in [regex]::Matches($text, $rule.Pattern)) {
+            $ids = @($match.Groups | Select-Object -Skip 1 | Where-Object { $_.Success } | ForEach-Object { $_.Value })
+            foreach ($id in $ids) {
+              if ($rule.Json) {
+                try { $id = [regex]::Unescape($id) } catch { }
+              }
+              if ($id -match '[^\x00-\x7F]') {
+                $violations++
+                $line = ($text.Substring(0, $match.Index) -split "`n").Count
+                $message = "NuGet package ID '$(ConvertTo-VisibleId $id)' contains non-ASCII characters, so it may be a look-alike of a real package."
+                $level = if ($failOnNonAscii) { 'error' } else { 'warning' }
+                Write-Host "##vso[task.logissue type=$level;sourcepath=$relative;linenumber=$line;]$message"
+                Write-Host "${level}: ${relative}:${line}: $message"
+              }
+            }
+          }
+        }
+      }
+
+      if ($violations -eq 0) {
+        Write-Host 'No non-ASCII NuGet package IDs found.'
+      } elseif ($failOnNonAscii) {
+        Write-Host "##vso[task.complete result=Failed;]Found $violations non-ASCII NuGet package ID(s)."
+        exit 1
+      } else {
+        Write-Host "##vso[task.complete result=SucceededWithIssues;]Found $violations non-ASCII NuGet package ID(s), not failing because failOnNonAsciiPackageId is false."
+      }
+    displayName: Check NuGet package IDs are ASCII
+    env:
+      SCAN_LOCATION: ${{ parameters.scanLocation }}
+      FAIL_ON_NON_ASCII: ${{ parameters.failOnNonAsciiPackageId }}
