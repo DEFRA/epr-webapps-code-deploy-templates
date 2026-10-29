@@ -62,7 +62,7 @@ jobs:
             - task: AzureKeyVault@2
               displayName: 'Obtain Docker Password'
               inputs:
-                azureSubscription: 'AZD-RWD-DEV1'
+                azureSubscription: 'AZD-RWD-DEV1-APP'
                 KeyVaultName: 'DEVRWDINFKV1401'
                 SecretsFilter: 'DockerPassword'
                 RunAsPreJob: true

@@ -33,7 +33,7 @@ steps:
     - task: AzureKeyVault@2
       displayName: 'Obtain Docker Password'
       inputs:
-        azureSubscription: 'AZD-RWD-DEV1'
+        azureSubscription: 'AZD-RWD-DEV1-APP'
         KeyVaultName: 'DEVRWDINFKV1401'
         SecretsFilter: 'DockerPassword'
         RunAsPreJob: true
@@ -89,30 +89,17 @@ steps:
       serviceName: ${{ upper(parameters.serviceName) }}
   
   - task: AzureKeyVault@2
-    condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
+    condition: in(variables['subscription'], 'AZD-RWD-DEV4', 'AZD-RWD-DEV4-APP')
     displayName: 'Obtain WebhookUrl'
     inputs:
-      azureSubscription: 'AZD-RWD-DEV1'
+      azureSubscription: 'AZD-RWD-DEV1-APP'
       KeyVaultName: 'DEVRWDINFKV1401'
-      SecretsFilter: 'TeamsNotificationWebhook, TeamsNotificationWebhookEviden'
+      SecretsFilter: 'TeamsNotificationWebhook'
   
   - template: send-teams-notification.yaml
     parameters:
-      condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
+      condition: in(variables['subscription'], 'AZD-RWD-DEV4', 'AZD-RWD-DEV4-APP')
       webhookUrl: $(TeamsNotificationWebhook)
-      message: |
-        Summary: Deployed ${{ parameters.registryName }}:${{ parameters.imageTag }} to ${{ parameters.serviceName }} in ${{ parameters.azureSubscription }} \n
-        Repository: $(Build.Repository.Name) \n
-        CommitID: $(Build.SourceVersion) \n
-        Pipeline: $(Build.DefinitionName) \n
-        Service: ${{ parameters.serviceName }} \n
-        Target: ${{ parameters.registryName }}:${{ parameters.imageTag }} \n
-        Subscription: ${{ parameters.azureSubscription }}
-  
-  - template: send-teams-notification.yaml
-    parameters:
-      condition: eq(variables['subscription'], 'AZD-RWD-DEV4')
-      webhookUrl: $(TeamsNotificationWebhookEviden)
       message: |
         Summary: Deployed ${{ parameters.registryName }}:${{ parameters.imageTag }} to ${{ parameters.serviceName }} in ${{ parameters.azureSubscription }} \n
         Repository: $(Build.Repository.Name) \n
