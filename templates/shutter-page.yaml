@@ -32,6 +32,5 @@ steps:
         scriptType: 'pscore'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az account set -s ${{ parameters.azureSubscription }}
           az storage blob upload-batch -d '$web' -s '$(Build.ArtifactStagingDirectory)' --account-name ${{ parameters.storage }} --overwrite true
         CleanTargetBeforeCopy: true
