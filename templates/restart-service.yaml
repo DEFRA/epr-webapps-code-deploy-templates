@@ -27,5 +27,4 @@ jobs:
                 echo "Restarting " ${{ parameters.serviceName }}
                 az webapp restart \
                   --name ${{ parameters.serviceName }} \
-                  --resource-group ${{ parameters.webResourceGroupName }} \
-                  --subscription ${{ parameters.subscriptionName }}
+                  --resource-group ${{ parameters.webResourceGroupName }}
