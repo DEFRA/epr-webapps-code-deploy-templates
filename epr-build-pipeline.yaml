@@ -98,6 +98,8 @@ stages:
         dependsOn: ''
         variables:
           - group: integration-test-secrets
+          # EPRADO-SonarQubeToken, linked to Key Vault DEVRWDINFKV1401
+          - group: EPR-SonarQube
         steps:
           - checkout: self          # Force full history for SonarQube analysis
             fetchDepth: 0

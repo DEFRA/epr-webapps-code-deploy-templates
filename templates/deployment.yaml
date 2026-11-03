@@ -26,14 +26,6 @@ steps:
     displayName: 'Show Environment Details'
 
   - ${{ if ne(parameters.targetEnvironment, 'development') }}:
-    - task: AzureKeyVault@2
-      displayName: 'Obtain Docker Password'
-      inputs:
-        azureSubscription: 'AZD-RWD-DEV1'
-        KeyVaultName: 'DEVRWDINFKV1401'
-        SecretsFilter: 'DockerPassword'
-        RunAsPreJob: true
-    
     - task: AzureCLI@2
       displayName: 'Copy Image to ${{ parameters.targetEnvironment }}'
       inputs:
@@ -42,7 +34,7 @@ steps:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az acr login --name ${{ parameters.acrName }}
-          az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
+          az acr import --name ${{ parameters.acrName }} --registry /subscriptions/8f549c59-2438-4495-b571-705081e497e4/resourceGroups/DEVRWDINFRG1401/providers/Microsoft.ContainerRegistry/registries/devrwdinfac1401 --source ${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --force
 
   - task: AzureRmWebAppDeployment@4
     displayName: 'Deploy code to --> ${{ upper(parameters.serviceName) }}'
