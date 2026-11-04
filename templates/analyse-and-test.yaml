@@ -168,9 +168,9 @@ steps:
             $instanceUrlPart = "vss-sonarqube.azure.defra.cloud"
           }
           "SonarQubeTest" {
-            $sonarQubeApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$(EPRADO-SonarQubeToken):"))
+            $sonarQubeTestApiToken = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$(EPRADO-SonarQubeTestToken):"))
             $headers = @{
-              "Authorization" = "Basic $sonarQubeApiToken"
+              "Authorization" = "Basic $sonarQubeTestApiToken"
               "Accept" = "application/json"
             };
             $instanceUrlPart = "vss-sonarqube-test.azure.defra.cloud"
