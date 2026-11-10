@@ -98,6 +98,8 @@ stages:
         dependsOn: ''
         variables:
           - group: integration-test-secrets
+          # EPRADO-SonarQubeToken for the SonarQube steps
+          - group: EPR-SonarQube
         steps:
           - checkout: self          # Force full history for SonarQube analysis
             fetchDepth: 0
