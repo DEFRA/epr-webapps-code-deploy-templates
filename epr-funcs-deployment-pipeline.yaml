@@ -32,6 +32,10 @@ parameters:
 jobs:
 - deployment: 'DeployAppCode'
   environment: ${{ parameters.targetEnvironment }}
+  ${{ if ne(parameters.targetEnvironment, 'development') }}:
+    variables:
+      # DockerPassword for the Copy Image step
+      - group: EPR-DockerRegistry
   pool:
     ${{ if or(contains(lower(parameters.envToDeploy), 'pre'), contains(lower(parameters.envToDeploy), 'prod')) }}:
       ${{ if eq(lower(parameters.poolOS), 'windows') }}:
@@ -67,7 +71,7 @@ jobs:
                 scriptLocation: 'inlineScript'
                 inlineScript: |
                   az acr login --name ${{ parameters.acrName }}
-                  az acr import --name ${{ parameters.acrName }} --registry /subscriptions/8f549c59-2438-4495-b571-705081e497e4/resourceGroups/DEVRWDINFRG1401/providers/Microsoft.ContainerRegistry/registries/devrwdinfac1401 --source ${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --force
+                  az acr import --name ${{ parameters.acrName }} --source devrwdinfac1401.azurecr.io/${{ parameters.registryName}}:${{ parameters.imageTag }} --image ${{ parameters.registryName }}:${{ parameters.imageTag }} --username devrwdinfac1401 --password $(DockerPassword) --force
 
           - task: AzureFunctionAppContainer@1
             displayName: 'Deploy code to Function app: ${{ upper(parameters.serviceName) }}'

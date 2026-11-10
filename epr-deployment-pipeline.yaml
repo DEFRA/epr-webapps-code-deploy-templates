@@ -32,6 +32,10 @@ parameters:
 jobs:
 - deployment: 'DeployAppCode'
   environment: ${{ parameters.targetEnvironment }}
+  ${{ if ne(parameters.targetEnvironment, 'development') }}:
+    variables:
+      # DockerPassword for the Copy Image step
+      - group: EPR-DockerRegistry
   pool:
     ${{ if or(contains(lower(parameters.envToDeploy), 'pre'), contains(lower(parameters.envToDeploy), 'prod')) }}:
       ${{ if eq(lower(parameters.poolOS), 'windows') }}:

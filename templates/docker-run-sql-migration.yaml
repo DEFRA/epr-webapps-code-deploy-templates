@@ -47,7 +47,7 @@ steps:
         if [ ${{parameters.azureContainerRegistryName}} != 'devrwdinfac1401' ]
         then
           az acr login --name ${{ parameters.azureContainerRegistryName }}
-          az acr import --name ${{ parameters.azureContainerRegistryName }} --registry /subscriptions/8f549c59-2438-4495-b571-705081e497e4/resourceGroups/DEVRWDINFRG1401/providers/Microsoft.ContainerRegistry/registries/devrwdinfac1401 --source ${{ parameters.repositoryName}}:${{parameters.branchName}}-database-migrations --image ${{ parameters.repositoryName }}:${{parameters.branchName}}-database-migrations --force
+          az acr import --name ${{ parameters.azureContainerRegistryName }} --source devrwdinfac1401.azurecr.io/${{ parameters.repositoryName}}:${{parameters.branchName}}-database-migrations --image ${{ parameters.repositoryName }}:${{parameters.branchName}}-database-migrations --username devrwdinfac1401 --password $(DockerPassword) --force
         fi
 
   - task: AzureCLI@2
